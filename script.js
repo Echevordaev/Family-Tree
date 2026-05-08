@@ -1,102 +1,120 @@
-const relatives = [
-  {
-    id: 1,
-    name: "Николай Иванович Язев",
-    birth: "1903",
-    death: "после 1946",
-    category: "yazev",
-    image: "images/nikolay_yazev.jpg", // замените на своё
-    description: "Автор рукописи. Инженер-капитан во время ВОВ. Служил на военном складе в Калуге. Записал историю семьи со слов отца и деда."
-  },
-  {
-    id: 2,
-    name: "Николай Иванович Чевордаев",
-    birth: "1921",
-    death: "2002",
-    category: "chevardaev",
-    image: "images/nikolay_chevardaev.jpg",
-    description: "Артиллерист на танке, ранен. Орден Отечественной войны II степени. 8-й ребёнок в семье, 4-й живой."
-  },
-  {
-    id: 3,
-    name: "Мария Сергеевна Язева (Ковешникова)",
-    birth: "1933",
-    death: "2021",
-    category: "yazev",
-    image: "images/mariya_yazeva.jpg",
-    description: "Инженер-конструктор на ф-ке Лыжина. В 7 лет потеряла мать, жила у тётки. Работала в семье Кира Булычёва."
-  },
-  {
-    id: 4,
-    name: "Юрий Николаевич Язев",
-    birth: "1933",
-    death: "1995",
-    category: "yazev",
-    image: "images/yuriy_yazev.jpg",
-    description: "Электрик, фотограф-любитель. После 4-х тюремных сроков остепенился. Принципиальный, писал письма о несправедливости."
-  },
-  // Добавляйте новых родственников по шаблону:
-  // {
-  //   id: 5,
-  //   name: "Имя Фамилия",
-  //   birth: "год",
-  //   death: "год",
-  //   category: "yazev/chevardaev/samsnov",
-  //   image: "images/filename.jpg",
-  //   description: "Краткая биография."
-  // }
-];
-
-// ====== Логика работы (можно не трогать) ======
-const container = document.getElementById('cardsContainer');
-const filters = document.querySelectorAll('.filter');
-const modal = document.getElementById('modal');
-const modalImg = document.getElementById('modal-img');
-const modalName = document.getElementById('modal-name');
-const modalDetails = document.getElementById('modal-details');
+const treeContainer = document.getElementById('tree-container');
+const modal = document.getElementById('person-modal');
+const modalBody = document.getElementById('modal-body');
 const modalClose = document.querySelector('.modal-close');
 
-function renderCards(category = 'all') {
-  container.innerHTML = '';
-  const filtered = category === 'all' 
-    ? relatives 
-    : relatives.filter(r => r.category === category);
-  
-  filtered.forEach(rel => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <img src="${rel.image}" alt="${rel.name}" onerror="this.src='images/placeholder.jpg'" />
-      <div class="card-body">
-        <h3>${rel.name}</h3>
-        <div class="life-years">${rel.birth} – ${rel.death}</div>
-        <p>${rel.description.substring(0, 80)}...</p>
-      </div>
-    `;
-    card.addEventListener('click', () => openModal(rel));
-    container.appendChild(card);
+// ===== Отрисовка схемы =====
+function renderTree() {
+  const width = treeContainer.clientWidth || 1000;
+  const height = 650;
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("width", "100%");
+  svg.setAttribute("height", height);
+
+  // Позиции кружков (можно менять для лучшего вида)
+  const positions = {
+    firs: [width*0.5, 40],
+    afanasiy: [width*0.5, 120],
+    ivan_af: [width*0.5, 200],
+    andrey: [width*0.5, 280],
+    ivan_andr: [width*0.3, 360],
+    nikolay_yazev: [width*0.3, 440],
+    yuriy_nik: [width*0.15, 520],
+    mariya: [width*0.35, 520],
+    vera: [width*0.1, 600],
+    lyubov: [width*0.25, 600],
+    ivan_che: [width*0.8, 200],
+    nikolay_che: [width*0.8, 280],
+    aleksandr_che: [width*0.7, 360],
+    evgeniy: [width*0.5, 500],
+    alexandr_evg: [width*0.42, 580],
+    dmitriy: [width*0.54, 580]
+  };
+
+  // Рисуем связи
+  links.forEach(link => {
+    const from = positions[link.from];
+    const to = positions[link.to];
+    if (from && to) {
+      const line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", from[0]);
+      line.setAttribute("y1", from[1]);
+      line.setAttribute("x2", to[0]);
+      line.setAttribute("y2", to[1]);
+      line.setAttribute("stroke", "#baa68b");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+    }
   });
+
+  // Рисуем кружки
+  Object.entries(positions).forEach(([id, [cx, cy]]) => {
+    const person = people.find(p => p.id === id);
+    if (!person) return;
+
+    const color = person.category === 'chevardaev' ? '#9bb7c7' : '#c7a87b';
+
+    const circle = document.createElementNS(svgNS, "circle");
+    circle.setAttribute("cx", cx);
+    circle.setAttribute("cy", cy);
+    circle.setAttribute("r", "18");
+    circle.setAttribute("fill", color);
+    circle.setAttribute("stroke", "#5a4a3a");
+    circle.setAttribute("stroke-width", "2");
+    circle.setAttribute("cursor", "pointer");
+    circle.setAttribute("data-id", id);
+    circle.addEventListener('click', () => showPerson(id));
+    svg.appendChild(circle);
+
+    const text = document.createElementNS(svgNS, "text");
+    text.setAttribute("x", cx);
+    text.setAttribute("y", cy + 28);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("font-size", "10");
+    text.setAttribute("fill", "#3b2e1e");
+    text.textContent = person.name.split(" ")[0];
+    svg.appendChild(text);
+  });
+
+  treeContainer.innerHTML = '';
+  treeContainer.appendChild(svg);
 }
 
-function openModal(rel) {
+// ===== Показать информацию о человеке =====
+function showPerson(id) {
+  const person = people.find(p => p.id === id);
+  if (!person) return;
+
+  const children = links.filter(l => l.from === id).map(l => {
+    const child = people.find(p => p.id === l.to);
+    return child ? child.name : '';
+  });
+  const parents = links.filter(l => l.to === id).map(l => {
+    const parent = people.find(p => p.id === l.from);
+    return parent ? parent.name : '';
+  });
+
+  modalBody.innerHTML = `
+    <img src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
+    <h2>${person.name}</h2>
+    <div class="years">${person.birth} – ${person.death}</div>
+    <p>${person.desc}</p>
+    ${person.spouse ? `<p><strong>Супруг(а):</strong> ${person.spouse}</p>` : ''}
+    ${parents.length ? `<p><strong>Родители:</strong> ${parents.join(', ')}</p>` : ''}
+    ${children.length ? `<p><strong>Дети:</strong> ${children.join(', ')}</p>` : ''}
+  `;
   modal.style.display = 'block';
-  modalImg.src = rel.image;
-  modalName.textContent = rel.name;
-  modalDetails.textContent = `${rel.birth} – ${rel.death}\n\n${rel.description}`;
 }
 
+// ===== Закрытие модального окна =====
 modalClose.addEventListener('click', () => modal.style.display = 'none');
-window.addEventListener('click', (e) => {
+window.addEventListener('click', e => {
   if (e.target === modal) modal.style.display = 'none';
 });
 
-filters.forEach(btn => {
-  btn.addEventListener('click', () => {
-    filters.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderCards(btn.dataset.filter);
-  });
-});
-
-// Старт
-renderCards();
+// ===== Старт =====
+renderTree();
+window.addEventListener('resize', renderTree);
