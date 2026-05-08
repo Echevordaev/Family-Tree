@@ -1,0 +1,56 @@
+const people = [
+  // Поколения Язевых
+  { id: "firs", name: "Фирс", birth: "ок. 1760-е", death: "?", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Крепостной крестьянин, дворовый барина. Самое дальнее известное имя рода. Жил в с. Новоселки." },
+  { id: "afanasiy", name: "Афанасий Фирсович", birth: "ок. 1790-е", death: "?", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Сторож в барском поместье. В 1812 году охранял хозяйское добро во время нашествия французов." },
+  { id: "ivan_af", name: "Иван Афанасьевич Язев", birth: "1814", death: "1897", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Словальщик и мотальщик шёлка. Грамотный, набожный, пел в церковном хоре. Никогда не ругался. В получку приносил внукам вязку баранок.", spouse: "Мария Галанина" },
+  { id: "andrey", name: "Андрей Иванович Язев", birth: "1854", death: "1923", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Слесарь на фабриках Лыжина и Синицына. Сильный, смекалистый. Пил запоями, разбрасывал деньги на улице; разбойник Козёл провожал его домой. После травмы стал инвалидом.", spouse: "Екатерина Базаева" },
+  { id: "ivan_andr", name: "Иван Андреевич Язев", birth: "1879", death: "1951", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Слесарь фабрики им. Лыжина. Стаж 54 года. Награждён знаком «Отличник соцсоревнования».", spouse: "Клавдия Полетаева" },
+  { id: "nikolay_yazev", name: "Николай Иванович Язев", birth: "1903", death: "после 1946", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Автор рукописи — летописи рода. Инженер-капитан в годы ВОВ. Служил на складе №906 в Калуге.", spouse: "" },
+  { id: "yuriy_nik", name: "Юрий Николаевич Язев", birth: "1933", death: "1995", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Электрик, фотограф-любитель. 4 раза сидел в тюрьме. После последнего срока изменил жизнь, бросил пить, стал правдоискателем.", spouse: "Мария Ковешникова (разв.)" },
+  { id: "mariya", name: "Мария Сергеевна Язева", birth: "1933", death: "2021", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Инженер-кон-структор на ф-ке Лыжина. Работала в семье Кира Булычёва. В 7 лет потеряла мать, воспитывалась тёткой.", spouse: "Юрий Язев (разв.)" },
+  { id: "vera", name: "Вера Юрьевна Язева", birth: "1962", death: "", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Хранительница фотостудии отца. Занималась в фотокружке Дома пионеров.", spouse: "Александр Чевордаев" },
+  { id: "lyubov", name: "Любовь Юрьевна Язева", birth: "1964", death: "", category: "yazev", photo: "images/placeholder.jpg",
+    desc: "Дочь Юрия и Марии. Сестра Веры.", spouse: "Владимир Самсонов" },
+
+  // Чевордаевы
+  { id: "ivan_che", name: "Иван Прокофьевич Чевордаев", birth: "ок. 1883", death: "1950", category: "chevardaev", photo: "images/placeholder.jpg",
+    desc: "Столяр из Казани. Позже жил в Ивантеевке.", spouse: "Прасковья Петровна" },
+  { id: "nikolay_che", name: "Николай Иванович Чевордаев", birth: "1921", death: "2002", category: "chevardaev", photo: "images/placeholder.jpg",
+    desc: "Артиллерист на танке. Орден Отечественной войны II ст. 8-й ребёнок в семье, 4-й живой.", spouse: "Раиса Егоровна" },
+  { id: "aleksandr_che", name: "Александр Николаевич Чевордаев", birth: "1961", death: "2010", category: "chevardaev", photo: "images/placeholder.jpg",
+    desc: "Муж Веры Юрьевны. Отец двоих сыновей.", spouse: "Вера Язева" },
+  { id: "evgeniy", name: "Евгений Александрович Чевордаев", birth: "1985", death: "", category: "chevardaev", photo: "images/placeholder.jpg",
+    desc: "Продолжатель рода. Составитель этого сайта.", spouse: "" },
+  { id: "alexandr_evg", name: "Александр Евгеньевич Чевордаев", birth: "2016", death: "", category: "chevardaev", photo: "images/placeholder.jpg",
+    desc: "Сын Евгения.", spouse: "" },
+  { id: "dmitriy", name: "Дмитрий Евгеньевич Чевордаев", birth: "2019", death: "", category: "chevardaev", photo: "images/placeholder.jpg",
+    desc: "Сын Евгения.", spouse: "" }
+];
+
+const links = [
+  { from: "firs", to: "afanasiy" },
+  { from: "afanasiy", to: "ivan_af" },
+  { from: "ivan_af", to: "andrey" },
+  { from: "andrey", to: "ivan_andr" },
+  { from: "ivan_andr", to: "nikolay_yazev" },
+  { from: "nikolay_yazev", to: "yuriy_nik" },
+  { from: "yuriy_nik", to: "vera" },
+  { from: "yuriy_nik", to: "lyubov" },
+  { from: "mariya", to: "vera" },
+  { from: "mariya", to: "lyubov" },
+  { from: "ivan_che", to: "nikolay_che" },
+  { from: "nikolay_che", to: "aleksandr_che" },
+  { from: "aleksandr_che", to: "evgeniy" },
+  { from: "vera", to: "evgeniy" },
+  { from: "evgeniy", to: "alexandr_evg" },
+  { from: "evgeniy", to: "dmitriy" }
+];
