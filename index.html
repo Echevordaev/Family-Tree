@@ -8,24 +8,47 @@
 </head>
 <body>
 <div class="container">
+
   <header>
     <h1>Родословная</h1>
     <p class="subtitle">Язевы — Чевордаевы</p>
+    <div class="filters">
+      <button class="filter active" data-filter="all">Все</button>
+      <button class="filter" data-filter="yazev">Язевы</button>
+      <button class="filter" data-filter="chevardaev">Чевордаевы</button>
+      <button class="filter" data-filter="koveshnikov">Ковешниковы</button>
+      <button class="filter" data-filter="samsnov">Самсоновы</button>
+    </div>
   </header>
 
   <section id="tree-section">
     <div id="tree-container"></div>
   </section>
 
+  <section id="chronicle-section">
+    <h2>Семейная летопись</h2>
+    <p class="chronicle-intro">Полный текст, составленный по рукописи Николая Ивановича Язева</p>
+    <ul class="chronicle-toc" id="chronicle-toc"></ul>
+  </section>
+
   <footer>
-    <p>Семейная летопись по рукописи Николая Ивановича Язева</p>
+    <p>Семейная летопись по рукописи Николая Ивановича Язева. Перепечатано и дополнено потомками.</p>
   </footer>
 </div>
 
+<!-- Карточка человека -->
 <div id="person-modal" class="modal">
   <div class="modal-content">
     <span class="modal-close">&times;</span>
     <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Полный текст главы -->
+<div id="chapter-modal" class="modal">
+  <div class="modal-content modal-chapter">
+    <span class="modal-close chapter-close">&times;</span>
+    <div id="chapter-body"></div>
   </div>
 </div>
 
