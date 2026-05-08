@@ -9,9 +9,11 @@ body {
   margin: 0 auto;
   padding: 20px 15px 40px;
 }
+
+/* Заголовок */
 header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 header h1 {
   font-size: 2.8rem;
@@ -23,22 +25,89 @@ header h1 {
   font-style: italic;
   color: #7a6855;
   margin-top: 5px;
+  margin-bottom: 20px;
 }
 
+/* Фильтры */
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.filter {
+  background: #e7d7c8;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.filter.active, .filter:hover {
+  background: #5a3e2b;
+  color: #faf7f2;
+}
+
+/* Дерево */
+#tree-section {
+  margin-bottom: 50px;
+}
 #tree-container {
   background: #fffcf7;
   border: 2px solid #e0d3c3;
   border-radius: 30px;
   padding: 20px 10px;
-  min-height: 600px;
+  min-height: 700px;
   position: relative;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   box-shadow: 0 8px 25px rgba(0,0,0,0.06);
 }
 
-/* Схема рисуется через JS + SVG */
+/* Летопись */
+#chronicle-section {
+  margin-top: 50px;
+  padding: 20px;
+  background: #fffcf7;
+  border: 2px solid #e0d3c3;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+}
+#chronicle-section h2 {
+  text-align: center;
+  color: #5a3e2b;
+  font-weight: normal;
+  margin-bottom: 5px;
+}
+.chronicle-intro {
+  text-align: center;
+  font-style: italic;
+  color: #7a6855;
+  margin-bottom: 20px;
+}
+.chronicle-toc {
+  list-style: none;
+  padding: 0;
+}
+.chronicle-toc li {
+  margin-bottom: 8px;
+}
+.chronicle-toc a {
+  color: #5a3e2b;
+  text-decoration: none;
+  font-size: 1.1rem;
+  border-bottom: 1px dotted #baa68b;
+  transition: 0.2s;
+}
+.chronicle-toc a:hover {
+  color: #8b5a3c;
+  border-bottom-color: #8b5a3c;
+}
 
+/* Подвал */
 footer {
   text-align: center;
   margin-top: 40px;
@@ -46,7 +115,7 @@ footer {
   color: #7a6855;
 }
 
-/* Модальное окно */
+/* Модалки */
 .modal {
   display: none;
   position: fixed;
@@ -61,9 +130,12 @@ footer {
   margin: 5vh auto;
   padding: 25px;
   border-radius: 20px;
-  max-width: 620px;
+  max-width: 660px;
   position: relative;
   box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+.modal-chapter {
+  max-width: 700px;
 }
 .modal-close {
   position: absolute;
@@ -84,30 +156,42 @@ footer {
 #modal-body h2 {
   font-size: 1.8rem;
   color: #5a3e2b;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
-#modal-body .years {
+.years {
   font-style: italic;
   color: #7a6855;
   margin-bottom: 15px;
 }
 #modal-body p {
   line-height: 1.7;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .kin-list {
   list-style: none;
-  padding-left: 0;
+  padding: 0;
   margin-top: 10px;
 }
 .kin-list li {
-  padding: 3px 0;
+  padding: 2px 0;
   color: #4a3a2a;
+}
+
+/* Главы */
+#chapter-body h3 {
+  font-size: 1.6rem;
+  color: #5a3e2b;
+  margin-bottom: 15px;
+}
+#chapter-body p {
+  line-height: 1.8;
+  margin-bottom: 15px;
+  text-align: justify;
 }
 
 /* Адаптив */
 @media (max-width: 700px) {
   header h1 { font-size: 2.2rem; }
-  #tree-container { padding: 10px 5px; border-radius: 20px; }
+  #tree-container { padding: 8px 4px; border-radius: 20px; min-height: 500px; }
   .modal-content { margin: 3vh auto; padding: 18px; }
 }
