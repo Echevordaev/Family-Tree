@@ -7,126 +7,183 @@ const chapterBody = document.getElementById('chapter-body');
 const modalClose = document.querySelectorAll('.modal-close');
 
 // ===================== ДЕРЕВО =====================
-const positions = {
-  firs: [50, 40],
-  afanasiy: [50, 130],
-  ivan_af: [50, 220],
-  marina: [14, 270],
-  andrey: [50, 310],
-  anna_m: [15, 390],
-  ekaterina: [40, 400],
-  ivan_andr: [72, 390],
-  klavdiya: [85, 450],
-  nikolay_yazev: [50, 470],
-  yuriy_nik: [25, 550],
-  mariya: [42, 550],
-  leonid: [58, 550],
-  lyudmila: [67, 550],
-  tatyana_n: [76, 550],
-  andrey_nik: [85, 550],
-  anatoliy_nik: [94, 550],
-  sergey_yazev: [94, 630],
-  vera: [15, 640],
-  lyubov: [30, 640],
-  sergey_kov: [58, 640],
-  anatoliy_kov: [36, 720],
-  aleksandr_kov: [58, 720],
-  ivan_che: [85, 640],
-  praskovya: [94, 700],
-  nikolay_che: [85, 720],
-  raisa: [94, 780],
-  yuriy_che: [72, 800],
-  aleksandr_che: [50, 800],
-  evgeniy: [30, 880],
-  igor_che: [42, 880],
-  alexandr_evg: [17, 950],
-  dmitriy: [35, 950],
-  vladimir: [72, 880],
-  aleksandr_sam: [60, 950],
-  svetlana: [80, 950],
+
+// Карта позиций для прямоугольных карточек (x, y в процентах от контейнера)
+const cardPositions = {
+  firs: [48, 1],
+  afanasiy: [48, 9],
+  ivan_af: [48, 17],
+  marina: [18, 21],
+  andrey: [48, 26],
+  anna_m: [18, 35],
+  ekaterina: [42, 35],
+  ivan_andr: [62, 35],
+  klavdiya: [72, 42],
+  nikolay_yazev: [48, 44],
+  yuriy_nik: [22, 53],
+  mariya: [38, 53],
+  leonid: [52, 53],
+  lyudmila: [58, 53],
+  tatyana_n: [64, 53],
+  andrey_nik: [70, 53],
+  anatoliy_nik: [76, 53],
+  sergey_yazev: [76, 62],
+  vera: [15, 65],
+  lyubov: [28, 65],
+  sergey_kov: [58, 62],
+  kseniya: [52, 62],
+  anatoliy_kov: [42, 72],
+  aleksandr_kov: [58, 72],
+  ivan_che: [88, 8],
+  praskovya: [82, 16],
+  nikolay_che: [88, 26],
+  raisa: [82, 34],
+  yuriy_che: [70, 72],
+  aleksandr_che: [42, 72],
+  evgeniy: [22, 80],
+  igor_che: [35, 80],
+  alexandr_evg: [10, 90],
+  dmitriy: [26, 90],
+  vladimir: [58, 80],
+  aleksandr_sam: [48, 90],
+  svetlana: [64, 90]
 };
 
 function drawTree() {
-  const width = treeContainer.clientWidth || 1100;
-  const height = Object.values(positions).reduce((max, p) => Math.max(max, p[1]), 1000) + 60;
+  const containerWidth = treeContainer.clientWidth || 1100;
+  const containerHeight = 1020;
+
+  // Очищаем контейнер
+  treeContainer.innerHTML = '';
+  treeContainer.style.position = 'relative';
+  treeContainer.style.width = '100%';
+  treeContainer.style.height = containerHeight + 'px';
+
+  // Создаём SVG для линий
   const svgNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNS, "svg");
-  svg.setAttribute("viewBox", `0 0 1100 ${height}`);
   svg.setAttribute("width", "100%");
-  svg.setAttribute("height", height);
+  svg.setAttribute("height", containerHeight);
+  svg.style.position = "absolute";
+  svg.style.top = "0";
+  svg.style.left = "0";
+  svg.style.pointerEvents = "none";
+  svg.style.zIndex = "1";
 
-  // Связи
+  // Рисуем линии между карточками
+  const toPx = (pct, dim) => (parseFloat(pct) / 100) * dim;
+
   links.forEach(link => {
-    const from = positions[link.from];
-    const to = positions[link.to];
-    if (!from || !to) return;
+    const fromPos = cardPositions[link.from];
+    const toPos = cardPositions[link.to];
+    if (!fromPos || !toPos) return;
+
+    const x1 = toPx(fromPos[0], containerWidth) + 70; // центр карточки (~140px ширина / 2)
+    const y1 = toPx(fromPos[1], containerHeight) + 55; // низ карточки
+    const x2 = toPx(toPos[0], containerWidth) + 70;
+    const y2 = toPx(toPos[1], containerHeight);
+
     const line = document.createElementNS(svgNS, "line");
-    const pctX = from[0] + '%';
-    line.setAttribute("x1", from[0]*1.1 + '%');
-    line.setAttribute("y1", from[1]+10);
-    line.setAttribute("x2", to[0]*1.1 + '%');
-    line.setAttribute("y2", to[1]-10);
+    line.setAttribute("x1", x1);
+    line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2);
+    line.setAttribute("y2", y2);
     line.setAttribute("stroke", "#baa68b");
     line.setAttribute("stroke-width", "2");
     svg.appendChild(line);
   });
 
-  // Кружки
-  Object.entries(positions).forEach(([id, [cx, cy]]) => {
+  treeContainer.appendChild(svg);
+
+  // Рисуем карточки
+  Object.entries(cardPositions).forEach(([id, [leftPct, topPct]]) => {
     const person = people.find(p => p.id === id);
     if (!person) return;
-    const color = person.category === 'chevardaev' ? '#9bb7c7'
-      : person.category === 'koveshnikov' ? '#b8a89a'
-      : person.category === 'samsnov' ? '#c7b89b'
-      : '#c7a87b';
 
-    const circle = document.createElementNS(svgNS, "circle");
-    circle.setAttribute("cx", cx + '%');
-    circle.setAttribute("cy", cy);
-    circle.setAttribute("r", "16");
-    circle.setAttribute("fill", color);
-    circle.setAttribute("stroke", "#5a4a3a");
-    circle.setAttribute("stroke-width", "2");
-    circle.setAttribute("cursor", "pointer");
-    circle.addEventListener('click', () => showPerson(id));
-    svg.appendChild(circle);
+    const card = document.createElement('div');
+    card.className = `tree-card ${person.category}`;
+    card.style.left = leftPct + '%';
+    card.style.top = topPct + '%';
+    card.setAttribute('data-id', id);
+    card.addEventListener('click', () => showPerson(id));
 
-    const text = document.createElementNS(svgNS, "text");
-    text.setAttribute("x", cx + '%');
-    text.setAttribute("y", cy + 26);
-    text.setAttribute("text-anchor", "middle");
-    text.setAttribute("font-size", "8");
-    text.setAttribute("fill", "#3b2e1e");
-    text.textContent = person.name.split(" ")[0];
-    svg.appendChild(text);
+    card.innerHTML = `
+      <img src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
+      <div class="card-info">
+        <div class="card-name">${person.name.split(' ')[0]}</div>
+        <div class="card-years">${person.birth} – ${person.death}</div>
+      </div>
+    `;
+    treeContainer.appendChild(card);
   });
-
-  treeContainer.innerHTML = '';
-  treeContainer.appendChild(svg);
 }
 
-// ===================== КАРТОЧКИ =====================
+// ===================== КАРТОЧКА ЧЕЛОВЕКА =====================
 function showPerson(id) {
   const person = people.find(p => p.id === id);
   if (!person) return;
-  const children = links.filter(l => l.from === id).map(l => {
-    const p = people.find(pp => pp.id === l.to);
-    return p ? p.name : '';
+
+  // Находим детей
+  const children = links
+    .filter(l => l.from === id)
+    .map(l => people.find(p => p.id === l.to))
+    .filter(Boolean);
+
+  // Находим родителей
+  const parents = links
+    .filter(l => l.to === id)
+    .map(l => people.find(p => p.id === l.from))
+    .filter(Boolean);
+
+  // Собираем все связанные фото (сам человек + родители + дети + супруг)
+  const galleryPhotos = [];
+  if (person.photo && person.photo !== 'images/placeholder.jpg') {
+    galleryPhotos.push({ src: person.photo, caption: person.name });
+  }
+  parents.forEach(p => {
+    if (p.photo && p.photo !== 'images/placeholder.jpg') {
+      galleryPhotos.push({ src: p.photo, caption: p.name });
+    }
   });
-  const parents = links.filter(l => l.to === id).map(l => {
-    const p = people.find(pp => pp.id === l.from);
-    return p ? p.name : '';
+  children.forEach(c => {
+    if (c.photo && c.photo !== 'images/placeholder.jpg') {
+      galleryPhotos.push({ src: c.photo, caption: c.name });
+    }
   });
 
+  const childrenNames = children.map(c => c.name).join(', ');
+  const parentsNames = parents.map(p => p.name).join(', ');
+
+  let galleryHTML = '';
+  if (galleryPhotos.length > 0) {
+    galleryHTML = `
+      <div class="gallery-title">Все фотографии (${galleryPhotos.length})</div>
+      <div class="gallery-grid">
+        ${galleryPhotos.map(g => `
+          <div class="gallery-item">
+            <img src="${g.src}" alt="${g.caption}" loading="lazy" />
+            <div class="gal-caption">${g.caption}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
   modalBody.innerHTML = `
-    <img src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
-    <h2>${person.name}</h2>
-    <div class="years">${person.birth} – ${person.death}</div>
-    <p>${person.desc}</p>
-    ${person.spouse ? `<p><strong>Супруг(а):</strong> ${person.spouse}</p>` : ''}
-    ${parents.length ? `<p><strong>Родители:</strong> ${parents.join(', ')}</p>` : ''}
-    ${children.length ? `<p><strong>Дети:</strong> ${children.join(', ')}</p>` : ''}
+    <div class="modal-person">
+      <img class="modal-person-main-photo" src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
+      <h2>${person.name}</h2>
+      <div class="years">${person.birth} – ${person.death}</div>
+      <p class="bio">${person.desc}</p>
+      <div class="relations">
+        ${person.spouse ? `<p><strong>Супруг(а):</strong> ${person.spouse}</p>` : ''}
+        ${parentsNames ? `<p><strong>Родители:</strong> ${parentsNames}</p>` : ''}
+        ${childrenNames ? `<p><strong>Дети:</strong> ${childrenNames}</p>` : ''}
+      </div>
+      ${galleryHTML}
+    </div>
   `;
+
   personModal.style.display = 'block';
 }
 
@@ -135,6 +192,7 @@ function renderTOC() {
   tocContainer.innerHTML = chapters.map((ch, i) => `
     <li><a href="#" data-index="${i}">${ch.title}</a></li>
   `).join('');
+
   document.querySelectorAll('.chronicle-toc a').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -161,8 +219,55 @@ document.querySelectorAll('.filter').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    drawTree();
+    const filterVal = btn.dataset.filter;
+    applyFilter(filterVal);
   });
+});
+
+function applyFilter(filterVal) {
+  document.querySelectorAll('.tree-card').forEach(card => {
+    const id = card.getAttribute('data-id');
+    const person = people.find(p => p.id === id);
+    if (filterVal === 'all' || (person && person.category === filterVal)) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+// ===================== ПЕРЕТАСКИВАНИЕ ДЕРЕВА =====================
+let isDragging = false;
+let startX, startY, scrollLeft, scrollTop;
+
+treeContainer.addEventListener('mousedown', e => {
+  isDragging = true;
+  treeContainer.style.cursor = 'grabbing';
+  startX = e.pageX - treeContainer.offsetLeft;
+  startY = e.pageY - treeContainer.offsetTop;
+  scrollLeft = treeContainer.scrollLeft;
+  scrollTop = treeContainer.scrollTop;
+});
+
+treeContainer.addEventListener('mouseleave', () => {
+  isDragging = false;
+  treeContainer.style.cursor = 'grab';
+});
+
+treeContainer.addEventListener('mouseup', () => {
+  isDragging = false;
+  treeContainer.style.cursor = 'grab';
+});
+
+treeContainer.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  e.preventDefault();
+  const x = e.pageX - treeContainer.offsetLeft;
+  const y = e.pageY - treeContainer.offsetTop;
+  const walkX = (x - startX) * 1.5;
+  const walkY = (y - startY) * 1.5;
+  treeContainer.scrollLeft = scrollLeft - walkX;
+  treeContainer.scrollTop = scrollTop - walkY;
 });
 
 // ===================== СТАРТ =====================
