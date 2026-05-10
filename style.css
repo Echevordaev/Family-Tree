@@ -5,7 +5,7 @@ body {
   color: #3b2e1e;
 }
 .container {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px 15px 40px;
 }
@@ -52,19 +52,74 @@ header h1 {
 }
 
 /* Дерево */
-#tree-section {
-  margin-bottom: 50px;
-}
+#tree-section { margin-bottom: 50px; }
 #tree-container {
   background: #fffcf7;
   border: 2px solid #e0d3c3;
   border-radius: 30px;
-  padding: 20px 10px;
-  min-height: 700px;
+  padding: 30px 15px;
   position: relative;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+  min-height: 600px;
+  cursor: grab;
+}
+#tree-container:active { cursor: grabbing; }
+
+/* Карточки на дереве */
+.tree-card {
+  position: absolute;
+  width: 140px;
+  background: white;
+  border: 2px solid #d4c5b2;
+  border-radius: 12px;
+  padding: 0;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+  font-size: 0.75rem;
+  z-index: 2;
+}
+.tree-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  z-index: 10;
+}
+.tree-card img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  background: #e7d7c8;
+  display: block;
+}
+.tree-card .card-info {
+  padding: 6px 6px 8px;
+}
+.tree-card .card-name {
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #3b2e1e;
+  line-height: 1.2;
+}
+.tree-card .card-years {
+  color: #7a6855;
+  font-style: italic;
+  font-size: 0.7rem;
+}
+.tree-card.yazev { border-color: #c7a87b; }
+.tree-card.chevardaev { border-color: #9bb7c7; }
+.tree-card.koveshnikov { border-color: #b8a89a; }
+.tree-card.samsnov { border-color: #c7b89b; }
+
+/* SVG-линии */
+#tree-container svg {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Летопись */
@@ -88,13 +143,8 @@ header h1 {
   color: #7a6855;
   margin-bottom: 20px;
 }
-.chronicle-toc {
-  list-style: none;
-  padding: 0;
-}
-.chronicle-toc li {
-  margin-bottom: 8px;
-}
+.chronicle-toc { list-style: none; padding: 0; }
+.chronicle-toc li { margin-bottom: 8px; }
 .chronicle-toc a {
   color: #5a3e2b;
   text-decoration: none;
@@ -127,15 +177,12 @@ footer {
 }
 .modal-content {
   background: #faf7f2;
-  margin: 5vh auto;
+  margin: 3vh auto;
   padding: 25px;
   border-radius: 20px;
-  max-width: 660px;
+  max-width: 700px;
   position: relative;
   box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-}
-.modal-chapter {
-  max-width: 700px;
 }
 .modal-close {
   position: absolute;
@@ -145,36 +192,70 @@ footer {
   cursor: pointer;
   line-height: 1;
 }
-#modal-body img {
+
+/* Контент модалки персоны */
+.modal-person-main-photo {
   width: 100%;
-  max-height: 360px;
+  max-height: 350px;
   object-fit: contain;
   background: #e7d7c8;
   border-radius: 12px;
   margin-bottom: 20px;
 }
-#modal-body h2 {
-  font-size: 1.8rem;
+.modal-person h2 {
+  font-size: 1.6rem;
   color: #5a3e2b;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
-.years {
+.modal-person .years {
   font-style: italic;
   color: #7a6855;
   margin-bottom: 15px;
 }
-#modal-body p {
+.modal-person .bio {
   line-height: 1.7;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  text-align: justify;
 }
-.kin-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 10px;
+.modal-person .relations {
+  margin-bottom: 15px;
 }
-.kin-list li {
-  padding: 2px 0;
-  color: #4a3a2a;
+.modal-person .relations strong {
+  color: #5a3e2b;
+}
+
+/* Галерея в модалке */
+.gallery-title {
+  font-size: 1.2rem;
+  color: #5a3e2b;
+  margin: 20px 0 10px;
+  border-top: 1px solid #e0d3c3;
+  padding-top: 15px;
+}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+.gallery-item {
+  text-align: center;
+  cursor: pointer;
+}
+.gallery-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e0d3c3;
+  transition: 0.2s;
+}
+.gallery-item img:hover {
+  border-color: #8b5a3c;
+}
+.gallery-item .gal-caption {
+  font-size: 0.7rem;
+  color: #7a6855;
+  margin-top: 3px;
 }
 
 /* Главы */
@@ -192,6 +273,4 @@ footer {
 /* Адаптив */
 @media (max-width: 700px) {
   header h1 { font-size: 2.2rem; }
-  #tree-container { padding: 8px 4px; border-radius: 20px; min-height: 500px; }
-  .modal-content { margin: 3vh auto; padding: 18px; }
 }
