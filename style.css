@@ -1,156 +1,73 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  background-color: #faf7f2;
-  font-family: "Georgia", serif;
-  color: #3b2e1e;
-  overscroll-behavior: none; /* чтобы избежать обновления страницы при свайпе */
-}
-.container { max-width: 100%; margin: 0 auto; padding: 20px 15px 40px; }
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Родословная Язевых и Чевордаевых</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
 
-/* Заголовок */
-header { text-align: center; margin-bottom: 15px; }
-header h1 { font-size: 2.8rem; font-weight: normal; letter-spacing: 2px; color: #5a3e2b; }
-.subtitle { font-style: italic; color: #7a6855; margin: 5px 0 15px; }
+  <header>
+    <h1>Родословная</h1>
+    <p class="subtitle">Язевы — Чевордаевы</p>
+    <div class="controls">
+      <div class="filters">
+        <button class="filter active" data-filter="all">Все</button>
+        <button class="filter" data-filter="yazev">Язевы</button>
+        <button class="filter" data-filter="chevardaev">Чевордаевы</button>
+        <button class="filter" data-filter="koveshnikov">Ковешниковы</button>
+        <button class="filter" data-filter="samsnov">Самсоновы</button>
+      </div>
+      <div class="zoom-controls" id="zoom-controls-desktop">
+        <button id="zoom-out" title="Уменьшить">−</button>
+        <span id="zoom-level">100%</span>
+        <button id="zoom-in" title="Увеличить">+</button>
+        <button id="zoom-reset" title="Сбросить">↺</button>
+      </div>
+    </div>
+  </header>
 
-/* Контролы */
-.controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-.filters { display: flex; gap: 8px; flex-wrap: wrap; }
-.filter {
-  background: #e7d7c8;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-family: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.filter.active, .filter:hover { background: #5a3e2b; color: #faf7f2; }
-.zoom-controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.zoom-controls button {
-  background: #e7d7c8;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-family: inherit;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.zoom-controls button:hover { background: #5a3e2b; color: #faf7f2; }
-#zoom-level { font-size: 0.9rem; color: #7a6855; min-width: 50px; text-align: center; }
+  <section id="tree-section">
+    <!-- Десктопное дерево (горизонтальное) -->
+    <div id="tree-wrapper-desktop" class="tree-wrapper">
+      <div id="tree-container"></div>
+    </div>
+    <!-- Мобильное дерево (вертикальное) -->
+    <div id="tree-wrapper-mobile" class="tree-wrapper-mobile">
+      <div id="tree-mobile-container"></div>
+    </div>
+  </section>
 
-/* Область дерева */
-#tree-wrapper {
-  position: relative;
-  width: 100%;
-  height: 70vh;
-  background: #fffcf7;
-  border: 2px solid #e0d3c3;
-  border-radius: 30px;
-  overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.06);
-  touch-action: none;  /* важно для кастомного pinch-zoom */
-}
-#tree-container {
-  position: absolute;
-  top: 0; left: 0;
-  width: 3000px;
-  height: 2000px;
-  transform-origin: top left;
-  transition: none;
-}
+  <section id="chronicle-section">
+    <h2>Семейная летопись</h2>
+    <p class="chronicle-intro">Полный текст по рукописи Николая Ивановича Язева</p>
+    <ul class="chronicle-toc" id="chronicle-toc"></ul>
+  </section>
 
-/* Карточки на дереве */
-.tree-card {
-  position: absolute;
-  width: 160px;
-  background: white;
-  border: 2px solid #d4c5b2;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  overflow: hidden;
-  font-size: 0.75rem;
-  z-index: 2;
-  /* не смещаем при трансформации */
-}
-.tree-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.18); z-index: 10; }
-.tree-card img {
-  width: 100%; height: 100px;
-  object-fit: cover; background: #e7d7c8; display: block;
-}
-.tree-card .card-info { padding: 6px 6px 8px; }
-.tree-card .card-name { font-weight: bold; font-size: 0.85rem; color: #3b2e1e; line-height: 1.2; }
-.tree-card .card-years { color: #7a6855; font-style: italic; font-size: 0.7rem; }
-.tree-card.yazev { border-color: #c7a87b; }
-.tree-card.chevardaev { border-color: #9bb7c7; }
-.tree-card.koveshnikov { border-color: #b8a89a; }
-.tree-card.samsnov { border-color: #c7b89b; }
+  <footer>
+    <p>Семейная летопись по рукописи Николая Ивановича Язева. Перепечатано и дополнено потомками.</p>
+  </footer>
+</div>
 
-/* SVG-линии */
-#tree-container svg { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
+<!-- Карточка человека -->
+<div id="person-modal" class="modal">
+  <div class="modal-content modal-person">
+    <span class="modal-close">&times;</span>
+    <div id="modal-body"></div>
+  </div>
+</div>
 
-/* Летопись */
-#chronicle-section {
-  margin-top: 50px; padding: 20px;
-  background: #fffcf7; border: 2px solid #e0d3c3; border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.06);
-}
-#chronicle-section h2 { text-align: center; color: #5a3e2b; font-weight: normal; margin-bottom: 5px; }
-.chronicle-intro { text-align: center; font-style: italic; color: #7a6855; margin-bottom: 20px; }
-.chronicle-toc { list-style: none; padding: 0; }
-.chronicle-toc li { margin-bottom: 8px; }
-.chronicle-toc a { color: #5a3e2b; text-decoration: none; font-size: 1.1rem; border-bottom: 1px dotted #baa68b; transition: 0.2s; }
-.chronicle-toc a:hover { color: #8b5a3c; border-bottom-color: #8b5a3c; }
+<!-- Полный текст главы -->
+<div id="chapter-modal" class="modal">
+  <div class="modal-content modal-chapter">
+    <span class="modal-close chapter-close">&times;</span>
+    <div id="chapter-body"></div>
+  </div>
+</div>
 
-/* Подвал */
-footer { text-align: center; margin-top: 40px; font-style: italic; color: #7a6855; }
-
-/* Модалки */
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow-y: auto; background: rgba(0,0,0,0.7); }
-.modal-content { background: #faf7f2; margin: 3vh auto; padding: 25px; border-radius: 20px; max-width: 700px; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
-.modal-close { position: absolute; top: 10px; right: 18px; font-size: 2.2rem; color: #5a3e2b; cursor: pointer; line-height: 1; }
-.modal-person-main-photo { width: 100%; max-height: 350px; object-fit: contain; background: #e7d7c8; border-radius: 12px; margin-bottom: 20px; }
-.modal-person h2 { font-size: 1.6rem; color: #5a3e2b; margin-bottom: 5px; }
-.years { font-style: italic; color: #7a6855; margin-bottom: 15px; }
-.bio { line-height: 1.7; margin-bottom: 15px; text-align: justify; }
-.relations { margin-bottom: 15px; }
-.relations p { margin-bottom: 6px; }
-.relations strong { color: #5a3e2b; }
-.person-link { color: #5a3e2b; text-decoration: underline; cursor: pointer; transition: 0.2s; }
-.person-link:hover { color: #8b5a3c; }
-.gallery-title { font-size: 1.2rem; color: #5a3e2b; margin: 20px 0 10px; border-top: 1px solid #e0d3c3; padding-top: 15px; }
-.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-.gallery-item { text-align: center; cursor: pointer; }
-.gallery-item img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #e0d3c3; transition: 0.2s; }
-.gallery-item img:hover { border-color: #8b5a3c; }
-.gal-caption { font-size: 0.7rem; color: #7a6855; margin-top: 3px; }
-#chapter-body h3 { font-size: 1.6rem; color: #5a3e2b; margin-bottom: 15px; }
-#chapter-body p { line-height: 1.8; margin-bottom: 15px; text-align: justify; }
-
-/* Адаптив */
-@media (max-width: 700px) {
-  header h1 { font-size: 2.2rem; }
-  .tree-card {
-    width: 130px;
-  }
-  .tree-card img {
-    height: 80px;
-  }
-  .tree-card .card-name { font-size: 0.75rem; }
-  .tree-card .card-years { font-size: 0.65rem; }
-}
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
