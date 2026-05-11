@@ -1,5 +1,5 @@
-const treeWrapper = document.getElementById('tree-wrapper');
 const treeContainer = document.getElementById('tree-container');
+const treeMobileContainer = document.getElementById('tree-mobile-container');
 const tocContainer = document.getElementById('chronicle-toc');
 const personModal = document.getElementById('person-modal');
 const chapterModal = document.getElementById('chapter-modal');
@@ -7,168 +7,7 @@ const modalBody = document.getElementById('modal-body');
 const chapterBody = document.getElementById('chapter-body');
 const modalClose = document.querySelectorAll('.modal-close');
 
-// ===================== ЗУМ =====================
-let scale = 1;
-let translateX = 0, translateY = 0;
-const zoomInBtn = document.getElementById('zoom-in');
-const zoomOutBtn = document.getElementById('zoom-out');
-const zoomResetBtn = document.getElementById('zoom-reset');
-const zoomLevelDisplay = document.getElementById('zoom-level');
-
-function applyTransform() {
-  treeContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-  zoomLevelDisplay.textContent = Math.round(scale * 100) + '%';
-}
-
-function setScale(newScale, centerX, centerY) {
-  // Центр зума — точка в координатах дерева, которую оставляем на месте
-  const oldScale = scale;
-  scale = Math.max(0.3, Math.min(2.5, newScale));
-  if (centerX !== undefined && centerY !== undefined) {
-    // Корректируем смещение, чтобы точка осталась под курсором
-    const dx = centerX - translateX;
-    const dy = centerY - translateY;
-    const factor = scale / oldScale;
-    translateX = centerX - dx * factor;
-    translateY = centerY - dy * factor;
-  }
-  applyTransform();
-}
-
-function fitToScreen() {
-  const wrapperWidth = treeWrapper.clientWidth;
-  const wrapperHeight = treeWrapper.clientHeight;
-  const containerWidth = 3000;
-  const containerHeight = 2000;
-  // Подгоняем так, чтобы всё дерево было видно с отступами
-  const scaleX = wrapperWidth / containerWidth;
-  const scaleY = wrapperHeight / containerHeight;
-  const fitScale = Math.min(scaleX, scaleY, 1); // не больше 1
-  scale = fitScale;
-  // Центрируем
-  translateX = (wrapperWidth - containerWidth * scale) / 2;
-  translateY = (wrapperHeight - containerHeight * scale) / 2;
-  applyTransform();
-}
-
-// Кнопки зума
-zoomInBtn.addEventListener('click', () => setScale(scale * 1.3, treeWrapper.clientWidth/2, treeWrapper.clientHeight/2));
-zoomOutBtn.addEventListener('click', () => setScale(scale / 1.3, treeWrapper.clientWidth/2, treeWrapper.clientHeight/2));
-zoomResetBtn.addEventListener('click', fitToScreen);
-
-// ===================== ПЕРЕТАСКИВАНИЕ (мышь + тач) =====================
-let isDragging = false;
-let startX, startY, startTranslateX, startTranslateY;
-let pinchStartDist = 0;
-let pinchStartScale = 1;
-let pinchCenterX = 0, pinchCenterY = 0;
-
-function getEventPos(e) {
-  if (e.touches) {
-    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }
-  return { x: e.clientX, y: e.clientY };
-}
-
-function getTwoFingersDist(e) {
-  if (!e.touches || e.touches.length < 2) return 0;
-  const dx = e.touches[0].clientX - e.touches[1].clientX;
-  const dy = e.touches[0].clientY - e.touches[1].clientY;
-  return Math.sqrt(dx*dx + dy*dy);
-}
-
-function getTwoFingersCenter(e) {
-  if (!e.touches || e.touches.length < 2) return { x: 0, y: 0 };
-  return {
-    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-  };
-}
-
-function onPointerDown(e) {
-  if (e.target.closest('.tree-card')) {
-    // При клике на карточку не начинаем драг (сработает click)
-    return;
-  }
-  e.preventDefault();
-  if (e.touches && e.touches.length === 2) {
-    // Начало pinch
-    isDragging = false;
-    pinchStartDist = getTwoFingersDist(e);
-    pinchStartScale = scale;
-    const center = getTwoFingersCenter(e);
-    pinchCenterX = center.x;
-    pinchCenterY = center.y;
-    return;
-  }
-  isDragging = true;
-  const pos = getEventPos(e);
-  startX = pos.x;
-  startY = pos.y;
-  startTranslateX = translateX;
-  startTranslateY = translateY;
-  treeWrapper.style.cursor = 'grabbing';
-}
-
-function onPointerMove(e) {
-  if (e.touches && e.touches.length === 2) {
-    // Pinch zoom
-    e.preventDefault();
-    const dist = getTwoFingersDist(e);
-    if (pinchStartDist > 0) {
-      const newScale = pinchStartScale * (dist / pinchStartDist);
-      // Чтобы сохранить позицию центра зума, пересчитаем координаты
-      // Но в pinch проще менять масштаб относительно центра касаний
-      const center = getTwoFingersCenter(e);
-      const rect = treeWrapper.getBoundingClientRect();
-      const pointX = (center.x - rect.left - translateX) / scale;
-      const pointY = (center.y - rect.top - translateY) / scale;
-      scale = Math.max(0.3, Math.min(2.5, newScale));
-      translateX = center.x - rect.left - pointX * scale;
-      translateY = center.y - rect.top - pointY * scale;
-      applyTransform();
-    }
-    return;
-  }
-  if (!isDragging) return;
-  e.preventDefault();
-  const pos = getEventPos(e);
-  const dx = pos.x - startX;
-  const dy = pos.y - startY;
-  translateX = startTranslateX + dx;
-  translateY = startTranslateY + dy;
-  applyTransform();
-}
-
-function onPointerUp(e) {
-  if (e.touches && e.touches.length < 2) {
-    pinchStartDist = 0;
-  }
-  if (!isDragging) return;
-  isDragging = false;
-  treeWrapper.style.cursor = 'grab';
-}
-
-// Мышь
-treeWrapper.addEventListener('mousedown', onPointerDown);
-window.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
-  onPointerMove(e);
-});
-window.addEventListener('mouseup', onPointerUp);
-
-// Тач
-treeWrapper.addEventListener('touchstart', onPointerDown, { passive: false });
-treeWrapper.addEventListener('touchmove', onPointerMove, { passive: false });
-treeWrapper.addEventListener('touchend', onPointerUp);
-treeWrapper.addEventListener('touchcancel', onPointerUp);
-
-// Предотвращаем стандартное поведение, чтобы не было скролла страницы
-treeWrapper.addEventListener('gesturestart', e => e.preventDefault());
-treeWrapper.addEventListener('gesturechange', e => e.preventDefault());
-treeWrapper.addEventListener('gestureend', e => e.preventDefault());
-
-// ===================== ДЕРЕВО =====================
+// ===================== Общие функции =====================
 const cardCoords = {
   firs: [1250, 30],
   afanasiy: [1250, 190],
@@ -209,76 +48,12 @@ const cardCoords = {
   svetlana: [1650, 1780]
 };
 
-function drawTree() {
-  treeContainer.innerHTML = '';
-
-  // SVG для линий
-  const svgNS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(svgNS, "svg");
-  svg.setAttribute("width", treeContainer.style.width || "3000px");
-  svg.setAttribute("height", treeContainer.style.height || "2000px");
-  svg.style.position = "absolute";
-  svg.style.top = "0";
-  svg.style.left = "0";
-  svg.style.pointerEvents = "none";
-  svg.style.zIndex = "1";
-
-  links.forEach(link => {
-    const from = cardCoords[link.from];
-    const to = cardCoords[link.to];
-    if (!from || !to) return;
-
-    const x1 = from[0] + 80;
-    const y1 = from[1] + 122;
-    const x2 = to[0] + 80;
-    const y2 = to[1];
-
-    const line = document.createElementNS(svgNS, "line");
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", x2);
-    line.setAttribute("y2", y2);
-    line.setAttribute("stroke", "#baa68b");
-    line.setAttribute("stroke-width", "2");
-    svg.appendChild(line);
-  });
-
-  treeContainer.appendChild(svg);
-
-  // Карточки
-  Object.entries(cardCoords).forEach(([id, [left, top]]) => {
-    const person = people.find(p => p.id === id);
-    if (!person) return;
-
-    const card = document.createElement('div');
-    card.className = `tree-card ${person.category}`;
-    card.style.left = left + 'px';
-    card.style.top = top + 'px';
-    card.setAttribute('data-id', id);
-    card.addEventListener('click', (e) => {
-      e.stopPropagation(); // чтобы не срабатывал drag
-      showPerson(id);
-    });
-
-    card.innerHTML = `
-      <img src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
-      <div class="card-info">
-        <div class="card-name">${person.name.split(' ')[0]}</div>
-        <div class="card-years">${person.birth || ''} ${person.death ? '– ' + person.death : ''}</div>
-      </div>
-    `;
-    treeContainer.appendChild(card);
-  });
-}
-
-// ===================== КАРТОЧКА ЧЕЛОВЕКА =====================
 function showPerson(id) {
   const person = people.find(p => p.id === id);
   if (!person) return;
 
   const children = links.filter(l => l.from === id).map(l => people.find(p => p.id === l.to)).filter(Boolean);
   const parents = links.filter(l => l.to === id).map(l => people.find(p => p.id === l.from)).filter(Boolean);
-
   let spouse = null;
   if (children.length > 0) {
     const spouseLinks = links.filter(l => children.some(c => c.id === l.to) && l.from !== id);
@@ -324,6 +99,219 @@ function showPerson(id) {
   personModal.style.display = 'block';
 }
 
+// ===================== ДЕСКТОПНОЕ ДЕРЕВО =====================
+let scale = 1, translateX = 0, translateY = 0;
+const treeWrapper = document.getElementById('tree-wrapper-desktop');
+const zoomLevelDisplay = document.getElementById('zoom-level');
+
+function applyTransform() {
+  treeContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  zoomLevelDisplay.textContent = Math.round(scale * 100) + '%';
+}
+
+function setScale(newScale, centerX, centerY) {
+  const oldScale = scale;
+  scale = Math.max(0.3, Math.min(2.5, newScale));
+  if (centerX !== undefined && centerY !== undefined) {
+    const dx = centerX - translateX;
+    const dy = centerY - translateY;
+    const factor = scale / oldScale;
+    translateX = centerX - dx * factor;
+    translateY = centerY - dy * factor;
+  }
+  applyTransform();
+}
+
+function fitToScreenDesktop() {
+  const wrapper = treeWrapper;
+  if (!wrapper || wrapper.offsetWidth === 0) return;
+  const wrapperWidth = wrapper.clientWidth;
+  const wrapperHeight = wrapper.clientHeight;
+  const containerWidth = 3000;
+  const containerHeight = 2000;
+  const scaleX = wrapperWidth / containerWidth;
+  const scaleY = wrapperHeight / containerHeight;
+  const fitScale = Math.min(scaleX, scaleY, 1);
+  scale = fitScale;
+  translateX = (wrapperWidth - containerWidth * scale) / 2;
+  translateY = (wrapperHeight - containerHeight * scale) / 2;
+  applyTransform();
+}
+
+function drawTreeDesktop() {
+  if (!treeContainer) return;
+  treeContainer.innerHTML = '';
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("width", "3000");
+  svg.setAttribute("height", "2000");
+  svg.style.position = "absolute";
+  svg.style.top = "0";
+  svg.style.left = "0";
+  svg.style.pointerEvents = "none";
+  svg.style.zIndex = "1";
+
+  links.forEach(link => {
+    const from = cardCoords[link.from];
+    const to = cardCoords[link.to];
+    if (!from || !to) return;
+    const x1 = from[0] + 80;
+    const y1 = from[1] + 122;
+    const x2 = to[0] + 80;
+    const y2 = to[1];
+
+    const line = document.createElementNS(svgNS, "line");
+    line.setAttribute("x1", x1);
+    line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2);
+    line.setAttribute("y2", y2);
+    line.setAttribute("stroke", "#baa68b");
+    line.setAttribute("stroke-width", "2");
+    svg.appendChild(line);
+  });
+  treeContainer.appendChild(svg);
+
+  Object.entries(cardCoords).forEach(([id, [left, top]]) => {
+    const person = people.find(p => p.id === id);
+    if (!person) return;
+
+    const card = document.createElement('div');
+    card.className = `tree-card ${person.category}`;
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
+    card.setAttribute('data-id', id);
+    card.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showPerson(id);
+    });
+
+    card.innerHTML = `
+      <img src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
+      <div class="card-info">
+        <div class="card-name">${person.name.split(' ')[0]}</div>
+        <div class="card-years">${person.birth || ''} ${person.death ? '– ' + person.death : ''}</div>
+      </div>
+    `;
+    treeContainer.appendChild(card);
+  });
+}
+
+// Drag & pinch для десктопа
+let isDragging = false, startX, startY, startTranslateX, startTranslateY;
+let pinchStartDist = 0, pinchStartScale = 1;
+
+function onPointerDown(e) {
+  if (e.target.closest('.tree-card')) return;
+  e.preventDefault();
+  if (e.touches && e.touches.length === 2) {
+    isDragging = false;
+    pinchStartDist = getTwoFingersDist(e);
+    pinchStartScale = scale;
+    return;
+  }
+  isDragging = true;
+  const pos = getEventPos(e);
+  startX = pos.x; startY = pos.y;
+  startTranslateX = translateX; startTranslateY = translateY;
+  treeWrapper.style.cursor = 'grabbing';
+}
+
+function onPointerMove(e) {
+  if (e.touches && e.touches.length === 2) {
+    e.preventDefault();
+    const dist = getTwoFingersDist(e);
+    if (pinchStartDist > 0) {
+      const newScale = pinchStartScale * (dist / pinchStartDist);
+      scale = Math.max(0.3, Math.min(2.5, newScale));
+      applyTransform();
+    }
+    return;
+  }
+  if (!isDragging) return;
+  e.preventDefault();
+  const pos = getEventPos(e);
+  translateX = startTranslateX + (pos.x - startX);
+  translateY = startTranslateY + (pos.y - startY);
+  applyTransform();
+}
+
+function onPointerUp() {
+  isDragging = false;
+  treeWrapper.style.cursor = 'grab';
+  pinchStartDist = 0;
+}
+
+function getEventPos(e) {
+  if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  return { x: e.clientX, y: e.clientY };
+}
+function getTwoFingersDist(e) {
+  if (!e.touches || e.touches.length < 2) return 0;
+  const dx = e.touches[0].clientX - e.touches[1].clientX;
+  const dy = e.touches[0].clientY - e.touches[1].clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+if (treeWrapper) {
+  treeWrapper.addEventListener('mousedown', onPointerDown);
+  window.addEventListener('mousemove', (e) => { if (isDragging) onPointerMove(e); });
+  window.addEventListener('mouseup', onPointerUp);
+  treeWrapper.addEventListener('touchstart', onPointerDown, { passive: false });
+  treeWrapper.addEventListener('touchmove', onPointerMove, { passive: false });
+  treeWrapper.addEventListener('touchend', onPointerUp);
+  treeWrapper.addEventListener('touchcancel', onPointerUp);
+}
+
+// Кнопки зума (десктоп)
+document.getElementById('zoom-in')?.addEventListener('click', () => setScale(scale * 1.3, treeWrapper.clientWidth/2, treeWrapper.clientHeight/2));
+document.getElementById('zoom-out')?.addEventListener('click', () => setScale(scale / 1.3, treeWrapper.clientWidth/2, treeWrapper.clientHeight/2));
+document.getElementById('zoom-reset')?.addEventListener('click', fitToScreenDesktop);
+
+// ===================== МОБИЛЬНОЕ ДЕРЕВО =====================
+function buildMobileTree() {
+  if (!treeMobileContainer) return;
+  // Строим упрощённое вертикальное дерево: перечисляем всех людей, группируем по поколениям
+  // Используем порядок, основанный на cardCoords (по y-координате)
+  const sortedPeople = people
+    .filter(p => cardCoords[p.id]) // только те, что на дереве
+    .sort((a, b) => cardCoords[a.id][1] - cardCoords[b.id][1]); // сортировка по y
+
+  const list = document.createElement('ul');
+  list.className = 'tree-mobile-list';
+
+  let currentY = null;
+  sortedPeople.forEach(person => {
+    const pos = cardCoords[person.id];
+    // Добавляем стрелку, если переход на новое поколение (разрыв по Y > 150)
+    if (currentY !== null && pos[1] - currentY > 150) {
+      const arrow = document.createElement('li');
+      arrow.className = 'mobile-arrow';
+      arrow.textContent = '↓';
+      list.appendChild(arrow);
+    }
+    currentY = pos[1];
+
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <div class="mobile-card ${person.category}" data-id="${person.id}">
+        <img src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
+        <div class="info">
+          <div class="name">${person.name}</div>
+          <div class="years">${person.birth || ''} ${person.death ? '– ' + person.death : ''}</div>
+        </div>
+      </div>
+    `;
+    li.querySelector('.mobile-card').addEventListener('click', (e) => {
+      showPerson(person.id);
+    });
+    list.appendChild(li);
+  });
+
+  treeMobileContainer.innerHTML = '';
+  treeMobileContainer.appendChild(list);
+}
+
 // ===================== ЛЕТОПИСЬ =====================
 function renderTOC() {
   tocContainer.innerHTML = chapters.map((ch, i) => `<li><a href="#" data-index="${i}">${ch.title}</a></li>`).join('');
@@ -338,7 +326,7 @@ function renderTOC() {
   });
 }
 
-// ===================== ЗАКРЫТИЕ =====================
+// ===================== ЗАКРЫТИЕ МОДАЛОК =====================
 modalClose.forEach(btn => btn.addEventListener('click', () => {
   personModal.style.display = 'none';
   chapterModal.style.display = 'none';
@@ -358,15 +346,29 @@ document.querySelectorAll('.filter').forEach(btn => {
 });
 
 function applyFilter(filterVal) {
+  // Десктопные карточки
   document.querySelectorAll('.tree-card').forEach(card => {
     const id = card.getAttribute('data-id');
     const person = people.find(p => p.id === id);
     card.style.display = (!person || filterVal === 'all' || person.category === filterVal) ? 'block' : 'none';
   });
+  // Мобильные карточки
+  document.querySelectorAll('.mobile-card').forEach(card => {
+    const id = card.getAttribute('data-id');
+    const person = people.find(p => p.id === id);
+    card.style.display = (!person || filterVal === 'all' || person.category === filterVal) ? 'flex' : 'none';
+    // также скрываем родительский li
+    const li = card.closest('li');
+    if (li) li.style.display = card.style.display;
+  });
 }
 
-// ===================== ЗАПУСК =====================
-drawTree();
+// ===================== ИНИЦИАЛИЗАЦИЯ =====================
+drawTreeDesktop();
+buildMobileTree();
 renderTOC();
-fitToScreen();
-window.addEventListener('resize', fitToScreen);
+fitToScreenDesktop();
+window.addEventListener('resize', () => {
+  fitToScreenDesktop();
+  // Если мобильное дерево уже построено, обновлять не нужно, только если размер поменялся — мы не перестраиваем
+});
