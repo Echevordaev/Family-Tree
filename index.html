@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Родословная Язевых и Чевордаевых</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -12,17 +12,27 @@
   <header>
     <h1>Родословная</h1>
     <p class="subtitle">Язевы — Чевордаевы</p>
-    <div class="filters">
-      <button class="filter active" data-filter="all">Все</button>
-      <button class="filter" data-filter="yazev">Язевы</button>
-      <button class="filter" data-filter="chevardaev">Чевордаевы</button>
-      <button class="filter" data-filter="koveshnikov">Ковешниковы</button>
-      <button class="filter" data-filter="samsnov">Самсоновы</button>
+    <div class="controls">
+      <div class="filters">
+        <button class="filter active" data-filter="all">Все</button>
+        <button class="filter" data-filter="yazev">Язевы</button>
+        <button class="filter" data-filter="chevardaev">Чевордаевы</button>
+        <button class="filter" data-filter="koveshnikov">Ковешниковы</button>
+        <button class="filter" data-filter="samsnov">Самсоновы</button>
+      </div>
+      <div class="zoom-controls">
+        <button id="zoom-out" title="Уменьшить">−</button>
+        <span id="zoom-level">100%</span>
+        <button id="zoom-in" title="Увеличить">+</button>
+        <button id="zoom-reset" title="Сбросить">↺</button>
+      </div>
     </div>
   </header>
 
   <section id="tree-section">
-    <div id="tree-container"></div>
+    <div id="tree-wrapper">
+      <div id="tree-container"></div>
+    </div>
   </section>
 
   <section id="chronicle-section">
