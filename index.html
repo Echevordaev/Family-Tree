@@ -20,7 +20,7 @@
         <button class="filter" data-filter="koveshnikov">Ковешниковы</button>
         <button class="filter" data-filter="samsnov">Самсоновы</button>
       </div>
-      <div class="zoom-controls">
+      <div class="zoom-controls" id="zoom-controls-desktop">
         <button id="zoom-out" title="Уменьшить">−</button>
         <span id="zoom-level">100%</span>
         <button id="zoom-in" title="Увеличить">+</button>
@@ -30,8 +30,13 @@
   </header>
 
   <section id="tree-section">
-    <div id="tree-wrapper">
+    <!-- Десктопное дерево (горизонтальное) -->
+    <div id="tree-wrapper-desktop" class="tree-wrapper">
       <div id="tree-container"></div>
+    </div>
+    <!-- Мобильное дерево (вертикальное) -->
+    <div id="tree-wrapper-mobile" class="tree-wrapper-mobile">
+      <div id="tree-mobile-container"></div>
     </div>
   </section>
 
