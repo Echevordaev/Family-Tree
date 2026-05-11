@@ -1,3 +1,4 @@
+const treeWrapper = document.getElementById('tree-wrapper');
 const treeContainer = document.getElementById('tree-container');
 const tocContainer = document.getElementById('chronicle-toc');
 const personModal = document.getElementById('person-modal');
@@ -6,82 +7,231 @@ const modalBody = document.getElementById('modal-body');
 const chapterBody = document.getElementById('chapter-body');
 const modalClose = document.querySelectorAll('.modal-close');
 
-// ===================== ДЕРЕВО =====================
+// ===================== ЗУМ =====================
+let scale = 1;
+let translateX = 0, translateY = 0;
+const zoomInBtn = document.getElementById('zoom-in');
+const zoomOutBtn = document.getElementById('zoom-out');
+const zoomResetBtn = document.getElementById('zoom-reset');
+const zoomLevelDisplay = document.getElementById('zoom-level');
 
-// Карта позиций для прямоугольных карточек (x, y в процентах от контейнера)
-const cardPositions = {
-  firs: [48, 1],
-  afanasiy: [48, 9],
-  ivan_af: [48, 17],
-  marina: [18, 21],
-  andrey: [48, 26],
-  anna_m: [18, 35],
-  ekaterina: [42, 35],
-  ivan_andr: [62, 35],
-  klavdiya: [72, 42],
-  nikolay_yazev: [48, 44],
-  yuriy_nik: [22, 53],
-  mariya: [38, 53],
-  leonid: [52, 53],
-  lyudmila: [58, 53],
-  tatyana_n: [64, 53],
-  andrey_nik: [70, 53],
-  anatoliy_nik: [76, 53],
-  sergey_yazev: [76, 62],
-  vera: [15, 65],
-  lyubov: [28, 65],
-  sergey_kov: [58, 62],
-  kseniya: [52, 62],
-  anatoliy_kov: [42, 72],
-  aleksandr_kov: [58, 72],
-  ivan_che: [88, 8],
-  praskovya: [82, 16],
-  nikolay_che: [88, 26],
-  raisa: [82, 34],
-  yuriy_che: [70, 72],
-  aleksandr_che: [42, 72],
-  evgeniy: [22, 80],
-  igor_che: [35, 80],
-  alexandr_evg: [10, 90],
-  dmitriy: [26, 90],
-  vladimir: [58, 80],
-  aleksandr_sam: [48, 90],
-  svetlana: [64, 90]
+function applyTransform() {
+  treeContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  zoomLevelDisplay.textContent = Math.round(scale * 100) + '%';
+}
+
+function setScale(newScale, centerX, centerY) {
+  // Центр зума — точка в координатах дерева, которую оставляем на месте
+  const oldScale = scale;
+  scale = Math.max(0.3, Math.min(2.5, newScale));
+  if (centerX !== undefined && centerY !== undefined) {
+    // Корректируем смещение, чтобы точка осталась под курсором
+    const dx = centerX - translateX;
+    const dy = centerY - translateY;
+    const factor = scale / oldScale;
+    translateX = centerX - dx * factor;
+    translateY = centerY - dy * factor;
+  }
+  applyTransform();
+}
+
+function fitToScreen() {
+  const wrapperWidth = treeWrapper.clientWidth;
+  const wrapperHeight = treeWrapper.clientHeight;
+  const containerWidth = 3000;
+  const containerHeight = 2000;
+  // Подгоняем так, чтобы всё дерево было видно с отступами
+  const scaleX = wrapperWidth / containerWidth;
+  const scaleY = wrapperHeight / containerHeight;
+  const fitScale = Math.min(scaleX, scaleY, 1); // не больше 1
+  scale = fitScale;
+  // Центрируем
+  translateX = (wrapperWidth - containerWidth * scale) / 2;
+  translateY = (wrapperHeight - containerHeight * scale) / 2;
+  applyTransform();
+}
+
+// Кнопки зума
+zoomInBtn.addEventListener('click', () => setScale(scale * 1.3, treeWrapper.clientWidth/2, treeWrapper.clientHeight/2));
+zoomOutBtn.addEventListener('click', () => setScale(scale / 1.3, treeWrapper.clientWidth/2, treeWrapper.clientHeight/2));
+zoomResetBtn.addEventListener('click', fitToScreen);
+
+// ===================== ПЕРЕТАСКИВАНИЕ (мышь + тач) =====================
+let isDragging = false;
+let startX, startY, startTranslateX, startTranslateY;
+let pinchStartDist = 0;
+let pinchStartScale = 1;
+let pinchCenterX = 0, pinchCenterY = 0;
+
+function getEventPos(e) {
+  if (e.touches) {
+    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+  return { x: e.clientX, y: e.clientY };
+}
+
+function getTwoFingersDist(e) {
+  if (!e.touches || e.touches.length < 2) return 0;
+  const dx = e.touches[0].clientX - e.touches[1].clientX;
+  const dy = e.touches[0].clientY - e.touches[1].clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+function getTwoFingersCenter(e) {
+  if (!e.touches || e.touches.length < 2) return { x: 0, y: 0 };
+  return {
+    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+  };
+}
+
+function onPointerDown(e) {
+  if (e.target.closest('.tree-card')) {
+    // При клике на карточку не начинаем драг (сработает click)
+    return;
+  }
+  e.preventDefault();
+  if (e.touches && e.touches.length === 2) {
+    // Начало pinch
+    isDragging = false;
+    pinchStartDist = getTwoFingersDist(e);
+    pinchStartScale = scale;
+    const center = getTwoFingersCenter(e);
+    pinchCenterX = center.x;
+    pinchCenterY = center.y;
+    return;
+  }
+  isDragging = true;
+  const pos = getEventPos(e);
+  startX = pos.x;
+  startY = pos.y;
+  startTranslateX = translateX;
+  startTranslateY = translateY;
+  treeWrapper.style.cursor = 'grabbing';
+}
+
+function onPointerMove(e) {
+  if (e.touches && e.touches.length === 2) {
+    // Pinch zoom
+    e.preventDefault();
+    const dist = getTwoFingersDist(e);
+    if (pinchStartDist > 0) {
+      const newScale = pinchStartScale * (dist / pinchStartDist);
+      // Чтобы сохранить позицию центра зума, пересчитаем координаты
+      // Но в pinch проще менять масштаб относительно центра касаний
+      const center = getTwoFingersCenter(e);
+      const rect = treeWrapper.getBoundingClientRect();
+      const pointX = (center.x - rect.left - translateX) / scale;
+      const pointY = (center.y - rect.top - translateY) / scale;
+      scale = Math.max(0.3, Math.min(2.5, newScale));
+      translateX = center.x - rect.left - pointX * scale;
+      translateY = center.y - rect.top - pointY * scale;
+      applyTransform();
+    }
+    return;
+  }
+  if (!isDragging) return;
+  e.preventDefault();
+  const pos = getEventPos(e);
+  const dx = pos.x - startX;
+  const dy = pos.y - startY;
+  translateX = startTranslateX + dx;
+  translateY = startTranslateY + dy;
+  applyTransform();
+}
+
+function onPointerUp(e) {
+  if (e.touches && e.touches.length < 2) {
+    pinchStartDist = 0;
+  }
+  if (!isDragging) return;
+  isDragging = false;
+  treeWrapper.style.cursor = 'grab';
+}
+
+// Мышь
+treeWrapper.addEventListener('mousedown', onPointerDown);
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  onPointerMove(e);
+});
+window.addEventListener('mouseup', onPointerUp);
+
+// Тач
+treeWrapper.addEventListener('touchstart', onPointerDown, { passive: false });
+treeWrapper.addEventListener('touchmove', onPointerMove, { passive: false });
+treeWrapper.addEventListener('touchend', onPointerUp);
+treeWrapper.addEventListener('touchcancel', onPointerUp);
+
+// Предотвращаем стандартное поведение, чтобы не было скролла страницы
+treeWrapper.addEventListener('gesturestart', e => e.preventDefault());
+treeWrapper.addEventListener('gesturechange', e => e.preventDefault());
+treeWrapper.addEventListener('gestureend', e => e.preventDefault());
+
+// ===================== ДЕРЕВО =====================
+const cardCoords = {
+  firs: [1250, 30],
+  afanasiy: [1250, 190],
+  ivan_af: [1250, 350],
+  marina: [600, 430],
+  andrey: [1250, 530],
+  anna_m: [450, 710],
+  ekaterina: [1050, 700],
+  ivan_andr: [1550, 710],
+  klavdiya: [1750, 840],
+  nikolay_yazev: [1250, 870],
+  yuriy_nik: [600, 1050],
+  mariya: [950, 1050],
+  leonid: [1300, 1050],
+  lyudmila: [1500, 1050],
+  tatyana_n: [1700, 1050],
+  andrey_nik: [1900, 1050],
+  anatoliy_nik: [2100, 1050],
+  sergey_yazev: [2100, 1220],
+  vera: [400, 1260],
+  lyubov: [750, 1260],
+  sergey_kov: [1450, 1220],
+  kseniya: [1300, 1220],
+  anatoliy_kov: [1050, 1410],
+  aleksandr_kov: [1450, 1410],
+  ivan_che: [2500, 170],
+  praskovya: [2350, 340],
+  nikolay_che: [2500, 530],
+  raisa: [2350, 700],
+  yuriy_che: [1850, 1410],
+  aleksandr_che: [1100, 1410],
+  evgeniy: [600, 1600],
+  igor_che: [850, 1600],
+  alexandr_evg: [350, 1780],
+  dmitriy: [700, 1780],
+  vladimir: [1500, 1600],
+  aleksandr_sam: [1250, 1780],
+  svetlana: [1650, 1780]
 };
 
 function drawTree() {
-  const containerWidth = treeContainer.clientWidth || 1100;
-  const containerHeight = 1020;
-
-  // Очищаем контейнер
   treeContainer.innerHTML = '';
-  treeContainer.style.position = 'relative';
-  treeContainer.style.width = '100%';
-  treeContainer.style.height = containerHeight + 'px';
 
-  // Создаём SVG для линий
+  // SVG для линий
   const svgNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNS, "svg");
-  svg.setAttribute("width", "100%");
-  svg.setAttribute("height", containerHeight);
+  svg.setAttribute("width", treeContainer.style.width || "3000px");
+  svg.setAttribute("height", treeContainer.style.height || "2000px");
   svg.style.position = "absolute";
   svg.style.top = "0";
   svg.style.left = "0";
   svg.style.pointerEvents = "none";
   svg.style.zIndex = "1";
 
-  // Рисуем линии между карточками
-  const toPx = (pct, dim) => (parseFloat(pct) / 100) * dim;
-
   links.forEach(link => {
-    const fromPos = cardPositions[link.from];
-    const toPos = cardPositions[link.to];
-    if (!fromPos || !toPos) return;
+    const from = cardCoords[link.from];
+    const to = cardCoords[link.to];
+    if (!from || !to) return;
 
-    const x1 = toPx(fromPos[0], containerWidth) + 70; // центр карточки (~140px ширина / 2)
-    const y1 = toPx(fromPos[1], containerHeight) + 55; // низ карточки
-    const x2 = toPx(toPos[0], containerWidth) + 70;
-    const y2 = toPx(toPos[1], containerHeight);
+    const x1 = from[0] + 80;
+    const y1 = from[1] + 122;
+    const x2 = to[0] + 80;
+    const y2 = to[1];
 
     const line = document.createElementNS(svgNS, "line");
     line.setAttribute("x1", x1);
@@ -95,23 +245,26 @@ function drawTree() {
 
   treeContainer.appendChild(svg);
 
-  // Рисуем карточки
-  Object.entries(cardPositions).forEach(([id, [leftPct, topPct]]) => {
+  // Карточки
+  Object.entries(cardCoords).forEach(([id, [left, top]]) => {
     const person = people.find(p => p.id === id);
     if (!person) return;
 
     const card = document.createElement('div');
     card.className = `tree-card ${person.category}`;
-    card.style.left = leftPct + '%';
-    card.style.top = topPct + '%';
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
     card.setAttribute('data-id', id);
-    card.addEventListener('click', () => showPerson(id));
+    card.addEventListener('click', (e) => {
+      e.stopPropagation(); // чтобы не срабатывал drag
+      showPerson(id);
+    });
 
     card.innerHTML = `
       <img src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
       <div class="card-info">
         <div class="card-name">${person.name.split(' ')[0]}</div>
-        <div class="card-years">${person.birth} – ${person.death}</div>
+        <div class="card-years">${person.birth || ''} ${person.death ? '– ' + person.death : ''}</div>
       </div>
     `;
     treeContainer.appendChild(card);
@@ -123,76 +276,57 @@ function showPerson(id) {
   const person = people.find(p => p.id === id);
   if (!person) return;
 
-  // Находим детей
-  const children = links
-    .filter(l => l.from === id)
-    .map(l => people.find(p => p.id === l.to))
-    .filter(Boolean);
+  const children = links.filter(l => l.from === id).map(l => people.find(p => p.id === l.to)).filter(Boolean);
+  const parents = links.filter(l => l.to === id).map(l => people.find(p => p.id === l.from)).filter(Boolean);
 
-  // Находим родителей
-  const parents = links
-    .filter(l => l.to === id)
-    .map(l => people.find(p => p.id === l.from))
-    .filter(Boolean);
+  let spouse = null;
+  if (children.length > 0) {
+    const spouseLinks = links.filter(l => children.some(c => c.id === l.to) && l.from !== id);
+    const spouseId = spouseLinks[0]?.from;
+    spouse = people.find(p => p.id === spouseId);
+  }
 
-  // Собираем все связанные фото (сам человек + родители + дети + супруг)
   const galleryPhotos = [];
-  if (person.photo && person.photo !== 'images/placeholder.jpg') {
-    galleryPhotos.push({ src: person.photo, caption: person.name });
-  }
-  parents.forEach(p => {
-    if (p.photo && p.photo !== 'images/placeholder.jpg') {
-      galleryPhotos.push({ src: p.photo, caption: p.name });
-    }
-  });
-  children.forEach(c => {
-    if (c.photo && c.photo !== 'images/placeholder.jpg') {
-      galleryPhotos.push({ src: c.photo, caption: c.name });
-    }
-  });
+  if (person.photo && person.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: person.photo, caption: person.name });
+  if (spouse && spouse.photo && spouse.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: spouse.photo, caption: spouse.name });
+  parents.forEach(p => { if (p.photo && p.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: p.photo, caption: p.name }); });
+  children.forEach(c => { if (c.photo && c.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: c.photo, caption: c.name }); });
 
-  const childrenNames = children.map(c => c.name).join(', ');
-  const parentsNames = parents.map(p => p.name).join(', ');
-
-  let galleryHTML = '';
-  if (galleryPhotos.length > 0) {
-    galleryHTML = `
-      <div class="gallery-title">Все фотографии (${galleryPhotos.length})</div>
-      <div class="gallery-grid">
-        ${galleryPhotos.map(g => `
-          <div class="gallery-item">
-            <img src="${g.src}" alt="${g.caption}" loading="lazy" />
-            <div class="gal-caption">${g.caption}</div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
+  const makeLinks = (arr) => arr.map(p => `<span class="person-link" data-id="${p.id}">${p.name}</span>`).join(', ') || '—';
 
   modalBody.innerHTML = `
     <div class="modal-person">
       <img class="modal-person-main-photo" src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
       <h2>${person.name}</h2>
-      <div class="years">${person.birth} – ${person.death}</div>
+      <div class="years">${person.birth || ''} ${person.death ? '– ' + person.death : ''}</div>
       <p class="bio">${person.desc}</p>
       <div class="relations">
-        ${person.spouse ? `<p><strong>Супруг(а):</strong> ${person.spouse}</p>` : ''}
-        ${parentsNames ? `<p><strong>Родители:</strong> ${parentsNames}</p>` : ''}
-        ${childrenNames ? `<p><strong>Дети:</strong> ${childrenNames}</p>` : ''}
+        <p><strong>Родители:</strong> ${makeLinks(parents)}</p>
+        ${spouse ? `<p><strong>Супруг(а):</strong> <span class="person-link" data-id="${spouse.id}">${spouse.name}</span></p>` : ''}
+        <p><strong>Дети:</strong> ${makeLinks(children)}</p>
       </div>
-      ${galleryHTML}
+      ${galleryPhotos.length > 0 ? `
+        <div class="gallery-title">Фотографии (${galleryPhotos.length})</div>
+        <div class="gallery-grid">
+          ${galleryPhotos.map(g => `<div class="gallery-item"><img src="${g.src}" alt="${g.caption}" loading="lazy" /><div class="gal-caption">${g.caption}</div></div>`).join('')}
+        </div>
+      ` : ''}
     </div>
   `;
+
+  modalBody.querySelectorAll('.person-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showPerson(link.dataset.id);
+    });
+  });
 
   personModal.style.display = 'block';
 }
 
 // ===================== ЛЕТОПИСЬ =====================
 function renderTOC() {
-  tocContainer.innerHTML = chapters.map((ch, i) => `
-    <li><a href="#" data-index="${i}">${ch.title}</a></li>
-  `).join('');
-
+  tocContainer.innerHTML = chapters.map((ch, i) => `<li><a href="#" data-index="${i}">${ch.title}</a></li>`).join('');
   document.querySelectorAll('.chronicle-toc a').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -219,8 +353,7 @@ document.querySelectorAll('.filter').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const filterVal = btn.dataset.filter;
-    applyFilter(filterVal);
+    applyFilter(btn.dataset.filter);
   });
 });
 
@@ -228,49 +361,12 @@ function applyFilter(filterVal) {
   document.querySelectorAll('.tree-card').forEach(card => {
     const id = card.getAttribute('data-id');
     const person = people.find(p => p.id === id);
-    if (filterVal === 'all' || (person && person.category === filterVal)) {
-      card.style.display = 'block';
-    } else {
-      card.style.display = 'none';
-    }
+    card.style.display = (!person || filterVal === 'all' || person.category === filterVal) ? 'block' : 'none';
   });
 }
 
-// ===================== ПЕРЕТАСКИВАНИЕ ДЕРЕВА =====================
-let isDragging = false;
-let startX, startY, scrollLeft, scrollTop;
-
-treeContainer.addEventListener('mousedown', e => {
-  isDragging = true;
-  treeContainer.style.cursor = 'grabbing';
-  startX = e.pageX - treeContainer.offsetLeft;
-  startY = e.pageY - treeContainer.offsetTop;
-  scrollLeft = treeContainer.scrollLeft;
-  scrollTop = treeContainer.scrollTop;
-});
-
-treeContainer.addEventListener('mouseleave', () => {
-  isDragging = false;
-  treeContainer.style.cursor = 'grab';
-});
-
-treeContainer.addEventListener('mouseup', () => {
-  isDragging = false;
-  treeContainer.style.cursor = 'grab';
-});
-
-treeContainer.addEventListener('mousemove', e => {
-  if (!isDragging) return;
-  e.preventDefault();
-  const x = e.pageX - treeContainer.offsetLeft;
-  const y = e.pageY - treeContainer.offsetTop;
-  const walkX = (x - startX) * 1.5;
-  const walkY = (y - startY) * 1.5;
-  treeContainer.scrollLeft = scrollLeft - walkX;
-  treeContainer.scrollTop = scrollTop - walkY;
-});
-
-// ===================== СТАРТ =====================
+// ===================== ЗАПУСК =====================
 drawTree();
 renderTOC();
-window.addEventListener('resize', drawTree);
+fitToScreen();
+window.addEventListener('resize', fitToScreen);
