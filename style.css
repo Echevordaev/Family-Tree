@@ -14,8 +14,8 @@ header h1 { font-size: 2.8rem; font-weight: normal; letter-spacing: 2px; color: 
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
   flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 20px;
 }
 .filters { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -30,140 +30,20 @@ header h1 { font-size: 2.8rem; font-weight: normal; letter-spacing: 2px; color: 
   transition: 0.3s;
 }
 .filter.active, .filter:hover { background: #5a3e2b; color: #faf7f2; }
-.zoom-controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.zoom-controls button {
-  background: #e7d7c8;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-family: inherit;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.zoom-controls button:hover { background: #5a3e2b; color: #faf7f2; }
-#zoom-level { font-size: 0.9rem; color: #7a6855; min-width: 50px; text-align: center; }
 
-/* Десктопное дерево */
-.tree-wrapper {
-  display: block;
-  position: relative;
+/* Контейнер дерева */
+#tree-section { margin-bottom: 50px; }
+#tree-container {
   width: 100%;
-  height: 70vh;
+  height: 80vh;
   background: #fffcf7;
   border: 2px solid #e0d3c3;
   border-radius: 30px;
-  overflow: hidden;
   box-shadow: 0 8px 25px rgba(0,0,0,0.06);
-  touch-action: none;
-}
-#tree-container {
-  position: absolute;
-  top: 0; left: 0;
-  width: 3000px;
-  height: 2000px;
-  transform-origin: top left;
-  transition: transform 0.1s ease;
-}
-.tree-card {
-  position: absolute;
-  width: 160px;
-  background: white;
-  border: 2px solid #d4c5b2;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
   overflow: hidden;
-  font-size: 0.75rem;
-  z-index: 2;
+  position: relative;
 }
-.tree-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.18); z-index: 10; }
-.tree-card img {
-  width: 100%; height: 100px;
-  object-fit: cover; background: #e7d7c8; display: block;
-}
-.tree-card .card-info { padding: 6px 6px 8px; }
-.tree-card .card-name { font-weight: bold; font-size: 0.85rem; color: #3b2e1e; line-height: 1.2; }
-.tree-card .card-years { color: #7a6855; font-style: italic; font-size: 0.7rem; }
-.tree-card.yazev { border-color: #c7a87b; }
-.tree-card.chevardaev { border-color: #9bb7c7; }
-.tree-card.koveshnikov { border-color: #b8a89a; }
-.tree-card.samsnov { border-color: #c7b89b; }
-
-/* Мобильное дерево */
-.tree-wrapper-mobile {
-  display: none;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  background: #fffcf7;
-  border: 2px solid #e0d3c3;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.06);
-}
-.tree-mobile-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  list-style: none;
-  padding: 0;
-}
-.tree-mobile-list li {
-  width: 100%;
-  max-width: 400px;
-}
-.mobile-card {
-  display: flex;
-  align-items: center;
-  background: white;
-  border: 2px solid #d4c5b2;
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  cursor: pointer;
-  transition: 0.2s;
-}
-.mobile-card:hover { background: #fcf9f5; }
-.mobile-card img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 50%;
-  background: #e7d7c8;
-  margin-right: 15px;
-  flex-shrink: 0;
-}
-.mobile-card .info {
-  flex-grow: 1;
-}
-.mobile-card .name {
-  font-weight: bold;
-  color: #3b2e1e;
-  font-size: 1.1rem;
-}
-.mobile-card .years {
-  font-style: italic;
-  color: #7a6855;
-  font-size: 0.9rem;
-}
-.mobile-arrow {
-  text-align: center;
-  color: #baa68b;
-  font-size: 1.5rem;
-  margin: 2px 0;
-}
-.mobile-card.yazev { border-left: 4px solid #c7a87b; }
-.mobile-card.chevardaev { border-left: 4px solid #9bb7c7; }
-.mobile-card.koveshnikov { border-left: 4px solid #b8a89a; }
-.mobile-card.samsnov { border-left: 4px solid #c7b89b; }
+#tree-container svg { width: 100%; height: 100%; }
 
 /* Летопись */
 #chronicle-section {
@@ -202,13 +82,8 @@ footer { text-align: center; margin-top: 40px; font-style: italic; color: #7a685
 #chapter-body h3 { font-size: 1.6rem; color: #5a3e2b; margin-bottom: 15px; }
 #chapter-body p { line-height: 1.8; margin-bottom: 15px; text-align: justify; }
 
-/* Переключение деревьев */
-@media (max-width: 768px) {
-  .tree-wrapper { display: none; }
-  .tree-wrapper-mobile { display: block; }
-  #zoom-controls-desktop { display: none; }
-}
-@media (min-width: 769px) {
-  .tree-wrapper { display: block; }
-  .tree-wrapper-mobile { display: none; }
+/* Адаптив */
+@media (max-width: 700px) {
+  header h1 { font-size: 2.2rem; }
+  #tree-container { height: 60vh; }
 }
