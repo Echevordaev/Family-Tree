@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Родословная Язевых и Чевордаевых</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -20,24 +21,11 @@
         <button class="filter" data-filter="koveshnikov">Ковешниковы</button>
         <button class="filter" data-filter="samsnov">Самсоновы</button>
       </div>
-      <div class="zoom-controls" id="zoom-controls-desktop">
-        <button id="zoom-out" title="Уменьшить">−</button>
-        <span id="zoom-level">100%</span>
-        <button id="zoom-in" title="Увеличить">+</button>
-        <button id="zoom-reset" title="Сбросить">↺</button>
-      </div>
     </div>
   </header>
 
   <section id="tree-section">
-    <!-- Десктопное дерево (горизонтальное) -->
-    <div id="tree-wrapper-desktop" class="tree-wrapper">
-      <div id="tree-container"></div>
-    </div>
-    <!-- Мобильное дерево (вертикальное) -->
-    <div id="tree-wrapper-mobile" class="tree-wrapper-mobile">
-      <div id="tree-mobile-container"></div>
-    </div>
+    <div id="tree-container"></div>
   </section>
 
   <section id="chronicle-section">
