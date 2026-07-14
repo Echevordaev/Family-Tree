@@ -1,5 +1,5 @@
+// ===================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====================
 const treeContainer = document.getElementById('tree-container');
-const treeMobileContainer = document.getElementById('tree-mobile-container');
 const tocContainer = document.getElementById('chronicle-toc');
 const personModal = document.getElementById('person-modal');
 const chapterModal = document.getElementById('chapter-modal');
@@ -7,58 +7,226 @@ const modalBody = document.getElementById('modal-body');
 const chapterBody = document.getElementById('chapter-body');
 const modalClose = document.querySelectorAll('.modal-close');
 
-// ===================== Общие функции =====================
-const cardCoords = {
-  firs: [1250, 30],
-  afanasiy: [1250, 190],
-  ivan_af: [1250, 350],
-  marina: [600, 430],
-  andrey: [1250, 530],
-  anna_m: [450, 710],
-  ekaterina: [1050, 700],
-  ivan_andr: [1550, 710],
-  klavdiya: [1750, 840],
-  nikolay_yazev: [1250, 870],
-  yuriy_nik: [600, 1050],
-  mariya: [950, 1050],
-  leonid: [1300, 1050],
-  lyudmila: [1500, 1050],
-  tatyana_n: [1700, 1050],
-  andrey_nik: [1900, 1050],
-  anatoliy_nik: [2100, 1050],
-  sergey_yazev: [2100, 1220],
-  vera: [400, 1260],
-  lyubov: [750, 1260],
-  sergey_kov: [1450, 1220],
-  kseniya: [1300, 1220],
-  anatoliy_kov: [1050, 1410],
-  aleksandr_kov: [1450, 1410],
-  ivan_che: [2500, 170],
-  praskovya: [2350, 340],
-  nikolay_che: [2500, 530],
-  raisa: [2350, 700],
-  yuriy_che: [1850, 1410],
-  aleksandr_che: [1100, 1410],
-  evgeniy: [600, 1600],
-  igor_che: [850, 1600],
-  alexandr_evg: [350, 1780],
-  dmitriy: [700, 1780],
-  vladimir: [1500, 1600],
-  aleksandr_sam: [1250, 1780],
-  svetlana: [1650, 1780]
+// Цвета для категорий
+const categoryColors = {
+  yazev: '#c7a87b',
+  chevardaev: '#9bb7c7',
+  koveshnikov: '#b8a89a',
+  samsnov: '#c7b89b'
 };
 
+// ===================== ПОСТРОЕНИЕ ИЕРАРХИИ =====================
+function buildHierarchy() {
+  // Преобразуем массив people в объект для быстрого доступа
+  const peopleMap = {};
+  people.forEach(p => peopleMap[p.id] = p);
+
+  // Создаем структуру для D3: каждый узел имеет id, name, children
+  // Сначала строим карту дочерних элементов
+  const childrenMap = {};
+  links.forEach(link => {
+    if (!childrenMap[link.from]) childrenMap[link.from] = [];
+    childrenMap[link.from].push(link.to);
+  });
+
+  // Рекурсивная функция построения узла
+  function buildNode(id) {
+    const person = peopleMap[id];
+    if (!person) return null;
+    const node = {
+      id: id,
+      name: person.name,
+      category: person.category,
+      photo: person.photo,
+      birth: person.birth,
+      death: person.death,
+      spouse: person.spouse,
+      desc: person.desc,
+      children: []
+    };
+    if (childrenMap[id]) {
+      childrenMap[id].forEach(childId => {
+        const childNode = buildNode(childId);
+        if (childNode) node.children.push(childNode);
+      });
+    }
+    return node;
+  }
+
+  // Ищем корни (узлы, которые не являются чьими-то детьми)
+  const allFromIds = new Set(links.map(l => l.from));
+  const allToIds = new Set(links.map(l => l.to));
+  const rootIds = [...allFromIds].filter(id => !allToIds.has(id));
+
+  // Строим лес
+  const roots = rootIds.map(id => buildNode(id)).filter(Boolean);
+  
+  // Если корней больше одного, создаем искусственный общий корень
+  if (roots.length > 1) {
+    return {
+      id: 'root',
+      name: 'Семьи',
+      category: 'root',
+      children: roots
+    };
+  } else if (roots.length === 1) {
+    return roots[0];
+  }
+  return null;
+}
+
+// ===================== ОТРИСОВКА ДЕРЕВА С ПОМОЩЬЮ D3 =====================
+let svg, g, zoomBehavior;
+
+function drawTree() {
+  // Очищаем контейнер
+  treeContainer.innerHTML = '';
+
+  const rootData = buildHierarchy();
+  if (!rootData) {
+    treeContainer.innerHTML = '<p style="text-align:center;padding:40px;">Нет данных для отображения</p>';
+    return;
+  }
+
+  // Размеры
+  const container = treeContainer;
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  // Создаем SVG
+  svg = d3.select('#tree-container')
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height);
+
+  // Группа для трансформаций
+  g = svg.append('g');
+
+  // Зум
+  zoomBehavior = d3.zoom()
+    .scaleExtent([0.2, 3])
+    .on('zoom', (event) => {
+      g.attr('transform', event.transform);
+    });
+
+  svg.call(zoomBehavior);
+  // Начальное смещение, чтобы дерево было видно по центру
+  svg.call(zoomBehavior.transform, d3.zoomIdentity.translate(50, 100).scale(0.8));
+
+  // Создаем иерархию D3
+  const root = d3.hierarchy(rootData);
+
+  // Определяем макет дерева (слева направо)
+  const treeLayout = d3.tree()
+    .size([height - 200, width - 200])
+    .separation((a, b) => (a.parent === b.parent ? 1.2 : 1.5));
+
+  treeLayout(root);
+
+  // Рисуем связи
+  g.selectAll('.link')
+    .data(root.links())
+    .enter()
+    .append('path')
+    .attr('class', 'link')
+    .attr('fill', 'none')
+    .attr('stroke', '#baa68b')
+    .attr('stroke-width', 2)
+    .attr('d', d3.linkHorizontal()
+      .x(d => d.y)
+      .y(d => d.x)
+    );
+
+  // Рисуем узлы
+  const node = g.selectAll('.node')
+    .data(root.descendants())
+    .enter()
+    .append('g')
+    .attr('class', 'node')
+    .attr('transform', d => `translate(${d.y},${d.x})`)
+    .on('click', (event, d) => {
+      event.stopPropagation();
+      if (d.data.id !== 'root') showPerson(d.data.id);
+    });
+
+  // Окружности с фото или инициалами
+  node.each(function(d) {
+    const el = d3.select(this);
+    const person = d.data;
+    const radius = 30;
+
+    // Если есть фото, используем pattern
+    if (person.photo && person.photo !== 'images/placeholder.jpg') {
+      // Создаем уникальный ID для pattern
+      const patternId = `img-${person.id}`;
+      // Определяем pattern
+      svg.append('defs')
+        .append('pattern')
+        .attr('id', patternId)
+        .attr('width', 1)
+        .attr('height', 1)
+        .append('image')
+        .attr('xlink:href', person.photo)
+        .attr('width', radius * 2)
+        .attr('height', radius * 2)
+        .attr('preserveAspectRatio', 'xMidYMid slice');
+
+      el.append('circle')
+        .attr('r', radius)
+        .attr('fill', `url(#${patternId})`)
+        .attr('stroke', '#5a4a3a')
+        .attr('stroke-width', 2);
+    } else {
+      // Без фото: цветной круг с инициалами
+      const color = categoryColors[person.category] || '#ccc';
+      el.append('circle')
+        .attr('r', radius)
+        .attr('fill', color)
+        .attr('stroke', '#5a4a3a')
+        .attr('stroke-width', 2);
+
+      const initials = person.name
+        .split(' ')
+        .map(w => w[0])
+        .join('')
+        .substring(0, 2);
+      el.append('text')
+        .attr('dy', 5)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', radius * 0.8)
+        .attr('fill', '#3b2e1e')
+        .text(initials);
+    }
+  });
+
+  // Подписи под узлами
+  node.append('text')
+    .attr('dy', 45)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '11px')
+    .attr('fill', '#3b2e1e')
+    .text(d => {
+      const p = d.data;
+      const years = p.birth ? `${p.birth}–${p.death || ''}` : '';
+      // Показываем только фамилию или короткое имя
+      const shortName = p.name.split(' ').slice(0, 2).join(' ');
+      return shortName.length > 18 ? shortName.substring(0, 16) + '...' : shortName;
+    });
+}
+
+// ===================== КАРТОЧКА ЧЕЛОВЕКА =====================
 function showPerson(id) {
   const person = people.find(p => p.id === id);
   if (!person) return;
 
   const children = links.filter(l => l.from === id).map(l => people.find(p => p.id === l.to)).filter(Boolean);
   const parents = links.filter(l => l.to === id).map(l => people.find(p => p.id === l.from)).filter(Boolean);
+
   let spouse = null;
+  // Ищем супруга: общие дети
   if (children.length > 0) {
-    const spouseLinks = links.filter(l => children.some(c => c.id === l.to) && l.from !== id);
-    const spouseId = spouseLinks[0]?.from;
-    spouse = people.find(p => p.id === spouseId);
+    const spouseCandidates = links.filter(l => children.some(c => c.id === l.to) && l.from !== id).map(l => people.find(p => p.id === l.from));
+    spouse = spouseCandidates[0] || null;
   }
 
   const galleryPhotos = [];
@@ -89,6 +257,7 @@ function showPerson(id) {
     </div>
   `;
 
+  // Кликабельные ссылки на других людей
   modalBody.querySelectorAll('.person-link').forEach(link => {
     link.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -97,219 +266,6 @@ function showPerson(id) {
   });
 
   personModal.style.display = 'block';
-}
-
-// ===================== ДЕСКТОПНОЕ ДЕРЕВО =====================
-let scale = 1, translateX = 0, translateY = 0;
-const treeWrapper = document.getElementById('tree-wrapper-desktop');
-const zoomLevelDisplay = document.getElementById('zoom-level');
-
-function applyTransform() {
-  treeContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-  zoomLevelDisplay.textContent = Math.round(scale * 100) + '%';
-}
-
-function setScale(newScale, centerX, centerY) {
-  const oldScale = scale;
-  scale = Math.max(0.3, Math.min(2.5, newScale));
-  if (centerX !== undefined && centerY !== undefined) {
-    const dx = centerX - translateX;
-    const dy = centerY - translateY;
-    const factor = scale / oldScale;
-    translateX = centerX - dx * factor;
-    translateY = centerY - dy * factor;
-  }
-  applyTransform();
-}
-
-function fitToScreenDesktop() {
-  const wrapper = treeWrapper;
-  if (!wrapper || wrapper.offsetWidth === 0) return;
-  const wrapperWidth = wrapper.clientWidth;
-  const wrapperHeight = wrapper.clientHeight;
-  const containerWidth = 3000;
-  const containerHeight = 2000;
-  const scaleX = wrapperWidth / containerWidth;
-  const scaleY = wrapperHeight / containerHeight;
-  const fitScale = Math.min(scaleX, scaleY, 1);
-  scale = fitScale;
-  translateX = (wrapperWidth - containerWidth * scale) / 2;
-  translateY = (wrapperHeight - containerHeight * scale) / 2;
-  applyTransform();
-}
-
-function drawTreeDesktop() {
-  if (!treeContainer) return;
-  treeContainer.innerHTML = '';
-
-  const svgNS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(svgNS, "svg");
-  svg.setAttribute("width", "3000");
-  svg.setAttribute("height", "2000");
-  svg.style.position = "absolute";
-  svg.style.top = "0";
-  svg.style.left = "0";
-  svg.style.pointerEvents = "none";
-  svg.style.zIndex = "1";
-
-  links.forEach(link => {
-    const from = cardCoords[link.from];
-    const to = cardCoords[link.to];
-    if (!from || !to) return;
-    const x1 = from[0] + 80;
-    const y1 = from[1] + 122;
-    const x2 = to[0] + 80;
-    const y2 = to[1];
-
-    const line = document.createElementNS(svgNS, "line");
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", x2);
-    line.setAttribute("y2", y2);
-    line.setAttribute("stroke", "#baa68b");
-    line.setAttribute("stroke-width", "2");
-    svg.appendChild(line);
-  });
-  treeContainer.appendChild(svg);
-
-  Object.entries(cardCoords).forEach(([id, [left, top]]) => {
-    const person = people.find(p => p.id === id);
-    if (!person) return;
-
-    const card = document.createElement('div');
-    card.className = `tree-card ${person.category}`;
-    card.style.left = left + 'px';
-    card.style.top = top + 'px';
-    card.setAttribute('data-id', id);
-    card.addEventListener('click', (e) => {
-      e.stopPropagation();
-      showPerson(id);
-    });
-
-    card.innerHTML = `
-      <img src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
-      <div class="card-info">
-        <div class="card-name">${person.name.split(' ')[0]}</div>
-        <div class="card-years">${person.birth || ''} ${person.death ? '– ' + person.death : ''}</div>
-      </div>
-    `;
-    treeContainer.appendChild(card);
-  });
-}
-
-// Drag & pinch для десктопа
-let isDragging = false, startX, startY, startTranslateX, startTranslateY;
-let pinchStartDist = 0, pinchStartScale = 1;
-
-function onPointerDown(e) {
-  if (e.target.closest('.tree-card')) return;
-  e.preventDefault();
-  if (e.touches && e.touches.length === 2) {
-    isDragging = false;
-    pinchStartDist = getTwoFingersDist(e);
-    pinchStartScale = scale;
-    return;
-  }
-  isDragging = true;
-  const pos = getEventPos(e);
-  startX = pos.x; startY = pos.y;
-  startTranslateX = translateX; startTranslateY = translateY;
-  treeWrapper.style.cursor = 'grabbing';
-}
-
-function onPointerMove(e) {
-  if (e.touches && e.touches.length === 2) {
-    e.preventDefault();
-    const dist = getTwoFingersDist(e);
-    if (pinchStartDist > 0) {
-      const newScale = pinchStartScale * (dist / pinchStartDist);
-      scale = Math.max(0.3, Math.min(2.5, newScale));
-      applyTransform();
-    }
-    return;
-  }
-  if (!isDragging) return;
-  e.preventDefault();
-  const pos = getEventPos(e);
-  translateX = startTranslateX + (pos.x - startX);
-  translateY = startTranslateY + (pos.y - startY);
-  applyTransform();
-}
-
-function onPointerUp() {
-  isDragging = false;
-  treeWrapper.style.cursor = 'grab';
-  pinchStartDist = 0;
-}
-
-function getEventPos(e) {
-  if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  return { x: e.clientX, y: e.clientY };
-}
-function getTwoFingersDist(e) {
-  if (!e.touches || e.touches.length < 2) return 0;
-  const dx = e.touches[0].clientX - e.touches[1].clientX;
-  const dy = e.touches[0].clientY - e.touches[1].clientY;
-  return Math.sqrt(dx*dx + dy*dy);
-}
-
-if (treeWrapper) {
-  treeWrapper.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('mousemove', (e) => { if (isDragging) onPointerMove(e); });
-  window.addEventListener('mouseup', onPointerUp);
-  treeWrapper.addEventListener('touchstart', onPointerDown, { passive: false });
-  treeWrapper.addEventListener('touchmove', onPointerMove, { passive: false });
-  treeWrapper.addEventListener('touchend', onPointerUp);
-  treeWrapper.addEventListener('touchcancel', onPointerUp);
-}
-
-// Кнопки зума (десктоп)
-document.getElementById('zoom-in')?.addEventListener('click', () => setScale(scale * 1.3, treeWrapper.clientWidth/2, treeWrapper.clientHeight/2));
-document.getElementById('zoom-out')?.addEventListener('click', () => setScale(scale / 1.3, treeWrapper.clientWidth/2, treeWrapper.clientHeight/2));
-document.getElementById('zoom-reset')?.addEventListener('click', fitToScreenDesktop);
-
-// ===================== МОБИЛЬНОЕ ДЕРЕВО =====================
-function buildMobileTree() {
-  if (!treeMobileContainer) return;
-  // Строим упрощённое вертикальное дерево: перечисляем всех людей, группируем по поколениям
-  // Используем порядок, основанный на cardCoords (по y-координате)
-  const sortedPeople = people
-    .filter(p => cardCoords[p.id]) // только те, что на дереве
-    .sort((a, b) => cardCoords[a.id][1] - cardCoords[b.id][1]); // сортировка по y
-
-  const list = document.createElement('ul');
-  list.className = 'tree-mobile-list';
-
-  let currentY = null;
-  sortedPeople.forEach(person => {
-    const pos = cardCoords[person.id];
-    // Добавляем стрелку, если переход на новое поколение (разрыв по Y > 150)
-    if (currentY !== null && pos[1] - currentY > 150) {
-      const arrow = document.createElement('li');
-      arrow.className = 'mobile-arrow';
-      arrow.textContent = '↓';
-      list.appendChild(arrow);
-    }
-    currentY = pos[1];
-
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <div class="mobile-card ${person.category}" data-id="${person.id}">
-        <img src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
-        <div class="info">
-          <div class="name">${person.name}</div>
-          <div class="years">${person.birth || ''} ${person.death ? '– ' + person.death : ''}</div>
-        </div>
-      </div>
-    `;
-    li.querySelector('.mobile-card').addEventListener('click', (e) => {
-      showPerson(person.id);
-    });
-    list.appendChild(li);
-  });
-
-  treeMobileContainer.innerHTML = '';
-  treeMobileContainer.appendChild(list);
 }
 
 // ===================== ЛЕТОПИСЬ =====================
@@ -346,29 +302,15 @@ document.querySelectorAll('.filter').forEach(btn => {
 });
 
 function applyFilter(filterVal) {
-  // Десктопные карточки
-  document.querySelectorAll('.tree-card').forEach(card => {
-    const id = card.getAttribute('data-id');
-    const person = people.find(p => p.id === id);
-    card.style.display = (!person || filterVal === 'all' || person.category === filterVal) ? 'block' : 'none';
-  });
-  // Мобильные карточки
-  document.querySelectorAll('.mobile-card').forEach(card => {
-    const id = card.getAttribute('data-id');
-    const person = people.find(p => p.id === id);
-    card.style.display = (!person || filterVal === 'all' || person.category === filterVal) ? 'flex' : 'none';
-    // также скрываем родительский li
-    const li = card.closest('li');
-    if (li) li.style.display = card.style.display;
+  if (!svg) return;
+  svg.selectAll('.node').each(function(d) {
+    const person = d.data;
+    const show = filterVal === 'all' || person.category === filterVal;
+    d3.select(this).style('opacity', show ? 1 : 0.2);
+    // Также можно скрыть связи, но это сложнее, оставим так
   });
 }
 
 // ===================== ИНИЦИАЛИЗАЦИЯ =====================
-drawTreeDesktop();
-buildMobileTree();
+drawTree();
 renderTOC();
-fitToScreenDesktop();
-window.addEventListener('resize', () => {
-  fitToScreenDesktop();
-  // Если мобильное дерево уже построено, обновлять не нужно, только если размер поменялся — мы не перестраиваем
-});
