@@ -239,41 +239,37 @@ function showPerson(id) {
     spouse = spouseCandidate || null;
   }
 
-  const galleryPhotos = [];
-  if (person.photo && person.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: person.photo, caption: person.name });
-  if (spouse?.photo && spouse.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: spouse.photo, caption: spouse.name });
-  parents.forEach(p => { if (p.photo && p.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: p.photo, caption: p.name }); });
-  children.forEach(c => { if (c.photo && c.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: c.photo, caption: c.name }); });
+// Сбор фотографий
+const galleryPhotos = [];
 
-  const makeLinks = (arr) => arr.map(p => `<span class="person-link" data-id="${p.id}">${p.name}</span>`).join(', ') || '—';
-
-  modalBody.innerHTML = `
-    <div class="modal-person">
-      <img class="modal-person-main-photo" src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
-      <h2>${person.name}</h2>
-      <div class="years">${person.birth || ''} ${person.death ? '– ' + person.death : ''}</div>
-      <p class="bio">${person.desc}</p>
-      <div class="relations">
-        <p><strong>Родители:</strong> ${makeLinks(parents)}</p>
-        ${spouse ? `<p><strong>Супруг(а):</strong> <span class="person-link" data-id="${spouse.id}">${spouse.name}</span></p>` : ''}
-        <p><strong>Дети:</strong> ${makeLinks(children)}</p>
-      </div>
-      ${galleryPhotos.length > 0 ? `
-        <div class="gallery-title">Фотографии (${galleryPhotos.length})</div>
-        <div class="gallery-grid">
-          ${galleryPhotos.map(g => `<div class="gallery-item"><img src="${g.src}" alt="${g.caption}" loading="lazy" /><div class="gal-caption">${g.caption}</div></div>`).join('')}
-        </div>
-      ` : ''}
-    </div>
-  `;
-  modalBody.querySelectorAll('.person-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.stopPropagation();
-      showPerson(link.dataset.id);
-    });
-  });
-  personModal.style.display = 'block';
+// Сначала главное фото
+if (person.photo && person.photo !== 'images/placeholder.jpg') {
+  galleryPhotos.push({ src: person.photo, caption: person.name });
 }
+
+// Добавляем все дополнительные фото человека
+if (person.photos) {
+  person.photos.forEach(photoPath => {
+    if (photoPath && photoPath !== 'images/placeholder.jpg') {
+      galleryPhotos.push({ src: photoPath, caption: person.name });
+    }
+  });
+}
+
+// Затем фото супруга, родителей, детей
+if (spouse?.photo && spouse.photo !== 'images/placeholder.jpg') {
+  galleryPhotos.push({ src: spouse.photo, caption: spouse.name });
+}
+parents.forEach(p => {
+  if (p.photo && p.photo !== 'images/placeholder.jpg') {
+    galleryPhotos.push({ src: p.photo, caption: p.name });
+  }
+});
+children.forEach(c => {
+  if (c.photo && c.photo !== 'images/placeholder.jpg') {
+    galleryPhotos.push({ src: c.photo, caption: c.name });
+  }
+});
 
 // ===================== ЛЕТОПИСЬ =====================
 function renderTOC() {
