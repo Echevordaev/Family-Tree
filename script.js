@@ -70,8 +70,39 @@ const nodeCoords = {
   lera_che: [1950, 1950]
 };
 
-// Масштаб и смещение
-let scale = 1, translateX = 50, translateY = 50;
+// Переменные масштаба и смещения
+let scale = 1;
+let translateX = 0;
+let translateY = 0;
+
+// Начальная установка масштаба, чтобы всё дерево было видно
+function initialFit() {
+  const container = treeContainer.parentElement; // #tree-section
+  const containerWidth = container.clientWidth || window.innerWidth;
+  const containerHeight = container.clientHeight || window.innerHeight * 0.8;
+
+  // Размер холста
+  const canvasWidth = 3000;
+  const canvasHeight = 2100;
+
+  // Вычисляем масштаб, чтобы вписаться с небольшими полями
+  const scaleX = (containerWidth - 20) / canvasWidth;
+  const scaleY = (containerHeight - 20) / canvasHeight;
+  scale = Math.min(scaleX, scaleY, 1); // Не увеличиваем больше 1
+
+  // Центрируем холст
+  translateX = (containerWidth - canvasWidth * scale) / 2;
+  translateY = (containerHeight - canvasHeight * scale) / 2;
+
+  applyTransform();
+}
+
+// Функция применения трансформации к контейнеру
+function applyTransform() {
+  treeContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  const zoomLevelEl = document.getElementById('zoom-level');
+  if (zoomLevelEl) zoomLevelEl.textContent = Math.round(scale * 100) + '%';
+}
 
 // ===================== ФУНКЦИЯ ОТРИСОВКИ ДЕРЕВА =====================
 function drawTree() {
@@ -176,55 +207,78 @@ function drawTree() {
     treeContainer.appendChild(nodeGroup);
   });
 
-  applyTransform();
+  // После отрисовки применяем масштаб
+  initialFit();
 }
 
-// ===================== ТРАНСФОРМАЦИЯ =====================
-function applyTransform() {
-  treeContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-  document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+// ===================== ПЕРЕТАСКИВАНИЕ (мышь и тач) =====================
+let isDragging = false;
+let startX, startY, startTX, startTY;
+
+// Общая функция для получения координат из события
+function getEventCoords(e) {
+  if (e.touches && e.touches.length > 0) {
+    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+  if (e.clientX !== undefined) {
+    return { x: e.clientX, y: e.clientY };
+  }
+  return null;
 }
 
-// ===================== ЗУМ И ПЕРЕТАСКИВАНИЕ =====================
-let isDragging = false, startX, startY, startTX, startTY;
-
-treeContainer.addEventListener('mousedown', (e) => {
+// Обработчик начала перетаскивания
+function onDragStart(e) {
+  // Игнорируем, если клик по узлу
   if (e.target.closest('.tree-node')) return;
+  e.preventDefault();
+  const coords = getEventCoords(e);
+  if (!coords) return;
   isDragging = true;
-  startX = e.clientX;
-  startY = e.clientY;
+  startX = coords.x;
+  startY = coords.y;
   startTX = translateX;
   startTY = translateY;
   treeContainer.style.cursor = 'grabbing';
-});
+}
 
-window.addEventListener('mousemove', (e) => {
+// Обработчик движения
+function onDragMove(e) {
   if (!isDragging) return;
-  translateX = startTX + (e.clientX - startX);
-  translateY = startTY + (e.clientY - startY);
+  e.preventDefault();
+  const coords = getEventCoords(e);
+  if (!coords) return;
+  translateX = startTX + (coords.x - startX);
+  translateY = startTY + (coords.y - startY);
   applyTransform();
-});
+}
 
-window.addEventListener('mouseup', () => {
+// Обработчик окончания
+function onDragEnd() {
   isDragging = false;
   treeContainer.style.cursor = 'grab';
-});
+}
 
-// Кнопки зума
+// Добавляем слушатели мыши
+treeContainer.addEventListener('mousedown', onDragStart);
+window.addEventListener('mousemove', onDragMove);
+window.addEventListener('mouseup', onDragEnd);
+
+// Добавляем слушатели тач-событий (для мобильных)
+treeContainer.addEventListener('touchstart', onDragStart, { passive: false });
+treeContainer.addEventListener('touchmove', onDragMove, { passive: false });
+treeContainer.addEventListener('touchend', onDragEnd);
+treeContainer.addEventListener('touchcancel', onDragEnd);
+
+// ===================== ЗУМ КНОПКАМИ =====================
 document.getElementById('zoom-in')?.addEventListener('click', () => {
   scale = Math.min(3, scale * 1.2);
   applyTransform();
 });
 document.getElementById('zoom-out')?.addEventListener('click', () => {
-  scale = Math.max(0.3, scale / 1.2);
+  scale = Math.max(0.2, scale / 1.2);
   applyTransform();
 });
-document.getElementById('zoom-reset')?.addEventListener('click', () => {
-  scale = 1;
-  translateX = 50;
-  translateY = 50;
-  applyTransform();
-});
+document.getElementById('zoom-reset')?.addEventListener('click', initialFit);
 
 // ===================== КАРТОЧКА ЧЕЛОВЕКА =====================
 function showPerson(id) {
@@ -239,37 +293,61 @@ function showPerson(id) {
     spouse = spouseCandidate || null;
   }
 
-// Сбор фотографий
-const galleryPhotos = [];
-
-// Сначала главное фото
-if (person.photo && person.photo !== 'images/placeholder.jpg') {
-  galleryPhotos.push({ src: person.photo, caption: person.name });
-}
-
-// Добавляем все дополнительные фото человека
-if (person.photos) {
-  person.photos.forEach(photoPath => {
-    if (photoPath && photoPath !== 'images/placeholder.jpg') {
-      galleryPhotos.push({ src: photoPath, caption: person.name });
+  // Сбор фотографий для галереи (главная + дополнительные + родственники)
+  const galleryPhotos = [];
+  if (person.photo && person.photo !== 'images/placeholder.jpg') {
+    galleryPhotos.push({ src: person.photo, caption: person.name });
+  }
+  if (person.photos && Array.isArray(person.photos)) {
+    person.photos.forEach(photoPath => {
+      if (photoPath && photoPath !== 'images/placeholder.jpg') {
+        galleryPhotos.push({ src: photoPath, caption: person.name });
+      }
+    });
+  }
+  if (spouse?.photo && spouse.photo !== 'images/placeholder.jpg') {
+    galleryPhotos.push({ src: spouse.photo, caption: spouse.name });
+  }
+  parents.forEach(p => {
+    if (p.photo && p.photo !== 'images/placeholder.jpg') {
+      galleryPhotos.push({ src: p.photo, caption: p.name });
     }
   });
-}
+  children.forEach(c => {
+    if (c.photo && c.photo !== 'images/placeholder.jpg') {
+      galleryPhotos.push({ src: c.photo, caption: c.name });
+    }
+  });
 
-// Затем фото супруга, родителей, детей
-if (spouse?.photo && spouse.photo !== 'images/placeholder.jpg') {
-  galleryPhotos.push({ src: spouse.photo, caption: spouse.name });
+  const makeLinks = (arr) => arr.map(p => `<span class="person-link" data-id="${p.id}">${p.name}</span>`).join(', ') || '—';
+
+  modalBody.innerHTML = `
+    <div class="modal-person">
+      <img class="modal-person-main-photo" src="${person.photo}" alt="${person.name}" onerror="this.src='images/placeholder.jpg'" />
+      <h2>${person.name}</h2>
+      <div class="years">${person.birth || ''} ${person.death ? '– ' + person.death : ''}</div>
+      <p class="bio">${person.desc}</p>
+      <div class="relations">
+        <p><strong>Родители:</strong> ${makeLinks(parents)}</p>
+        ${spouse ? `<p><strong>Супруг(а):</strong> <span class="person-link" data-id="${spouse.id}">${spouse.name}</span></p>` : ''}
+        <p><strong>Дети:</strong> ${makeLinks(children)}</p>
+      </div>
+      ${galleryPhotos.length > 0 ? `
+        <div class="gallery-title">Фотографии (${galleryPhotos.length})</div>
+        <div class="gallery-grid">
+          ${galleryPhotos.map(g => `<div class="gallery-item"><img src="${g.src}" alt="${g.caption}" loading="lazy" /><div class="gal-caption">${g.caption}</div></div>`).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+  modalBody.querySelectorAll('.person-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showPerson(link.dataset.id);
+    });
+  });
+  personModal.style.display = 'block';
 }
-parents.forEach(p => {
-  if (p.photo && p.photo !== 'images/placeholder.jpg') {
-    galleryPhotos.push({ src: p.photo, caption: p.name });
-  }
-});
-children.forEach(c => {
-  if (c.photo && c.photo !== 'images/placeholder.jpg') {
-    galleryPhotos.push({ src: c.photo, caption: c.name });
-  }
-});
 
 // ===================== ЛЕТОПИСЬ =====================
 function renderTOC() {
