@@ -7,7 +7,7 @@ const modalBody = document.getElementById('modal-body');
 const chapterBody = document.getElementById('chapter-body');
 const modalClose = document.querySelectorAll('.modal-close');
 
-// Цвета для категорий
+// Цвета категорий
 const categoryColors = {
   yazev: '#c7a87b',
   chevardaev: '#9bb7c7',
@@ -15,204 +15,216 @@ const categoryColors = {
   samsnov: '#c7b89b'
 };
 
-// ===================== ПОСТРОЕНИЕ ИЕРАРХИИ =====================
-function buildHierarchy() {
-  // Преобразуем массив people в объект для быстрого доступа
-  const peopleMap = {};
-  people.forEach(p => peopleMap[p.id] = p);
+// Координаты узлов (x, y) на холсте 3000x2100
+const nodeCoords = {
+  firs: [1250, 60],
+  afanasiy: [1250, 220],
+  ivan_af: [1250, 380],
+  marina: [600, 460],
+  andrey: [1250, 560],
+  anna_m: [450, 740],
+  ekaterina: [1050, 730],
+  ivan_andr: [1550, 740],
+  klavdiya: [1750, 870],
+  nikolay_yazev: [1250, 920],
+  yuriy_nik: [600, 1100],
+  mariya: [950, 1100],
+  leonid: [1300, 1100],
+  lyudmila: [1500, 1100],
+  tatyana_n: [1700, 1100],
+  andrey_nik: [1900, 1100],
+  anatoliy_nik: [2100, 1100],
+  sergey_yazev: [2100, 1270],
+  vera: [400, 1300],
+  lyubov: [750, 1300],
+  sergey_kov: [1450, 1270],
+  kseniya: [1300, 1270],
+  anatoliy_kov: [1050, 1450],
+  aleksandr_kov: [1450, 1450],
+  ivan_che: [2500, 200],
+  praskovya: [2350, 370],
+  nikolay_che: [2500, 560],
+  raisa: [2350, 730],
+  yuriy_che: [1850, 1450],
+  aleksandr_che: [1100, 1450],
+  evgeniy: [600, 1650],
+  igor_che: [850, 1650],
+  alexandr_evg: [350, 1830],
+  dmitriy: [700, 1830],
+  vladimir: [1500, 1650],
+  aleksandr_sam: [1250, 1830],
+  svetlana: [1650, 1830],
 
-  // Создаем структуру для D3: каждый узел имеет id, name, children
-  // Сначала строим карту дочерних элементов
-  const childrenMap = {};
+  // Новые узлы
+  nina_kov: [800, 1630],
+  nadezhda_kov: [1000, 1630],
+  nadya_kov: [700, 1800],
+  dmitriy_nad: [1050, 1800],
+  lyubov_kov: [1300, 1630],
+  mikhail_kov: [1500, 1630],
+  alexey_che: [1700, 1630],
+  vyacheslav_che: [1900, 1630],
+  tatyana_alexey: [1750, 1800],
+  tatyana_vyach: [1950, 1800],
+  artem_che: [1650, 1950],
+  lera_che: [1950, 1950]
+};
+
+// Масштаб и смещение
+let scale = 1, translateX = 50, translateY = 50;
+
+// ===================== ФУНКЦИЯ ОТРИСОВКИ ДЕРЕВА =====================
+function drawTree() {
+  treeContainer.innerHTML = '';
+  treeContainer.style.position = 'relative';
+  treeContainer.style.width = '3000px';
+  treeContainer.style.height = '2100px';
+  treeContainer.style.transformOrigin = 'top left';
+
+  // Создаём SVG для линий
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("width", "3000");
+  svg.setAttribute("height", "2100");
+  svg.style.position = "absolute";
+  svg.style.top = "0";
+  svg.style.left = "0";
+  svg.style.pointerEvents = "none";
+  svg.style.zIndex = "1";
+
+  // Рисуем линии связей
   links.forEach(link => {
-    if (!childrenMap[link.from]) childrenMap[link.from] = [];
-    childrenMap[link.from].push(link.to);
+    const from = nodeCoords[link.from];
+    const to = nodeCoords[link.to];
+    if (!from || !to) return;
+
+    const path = document.createElementNS(svgNS, "path");
+    const x1 = from[0], y1 = from[1] + 35;
+    const x2 = to[0], y2 = to[1] - 35;
+    const midX = (x1 + x2) / 2;
+    const d = `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`;
+    path.setAttribute("d", d);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "#baa68b");
+    path.setAttribute("stroke-width", "2");
+    svg.appendChild(path);
   });
 
-  // Рекурсивная функция построения узла
-  function buildNode(id) {
-    const person = peopleMap[id];
-    if (!person) return null;
-    const node = {
-      id: id,
-      name: person.name,
-      category: person.category,
-      photo: person.photo,
-      birth: person.birth,
-      death: person.death,
-      spouse: person.spouse,
-      desc: person.desc,
-      children: []
-    };
-    if (childrenMap[id]) {
-      childrenMap[id].forEach(childId => {
-        const childNode = buildNode(childId);
-        if (childNode) node.children.push(childNode);
-      });
-    }
-    return node;
-  }
-
-  // Ищем корни (узлы, которые не являются чьими-то детьми)
-  const allFromIds = new Set(links.map(l => l.from));
-  const allToIds = new Set(links.map(l => l.to));
-  const rootIds = [...allFromIds].filter(id => !allToIds.has(id));
-
-  // Строим лес
-  const roots = rootIds.map(id => buildNode(id)).filter(Boolean);
-  
-  // Если корней больше одного, создаем искусственный общий корень
-  if (roots.length > 1) {
-    return {
-      id: 'root',
-      name: 'Семьи',
-      category: 'root',
-      children: roots
-    };
-  } else if (roots.length === 1) {
-    return roots[0];
-  }
-  return null;
-}
-
-// ===================== ОТРИСОВКА ДЕРЕВА С ПОМОЩЬЮ D3 =====================
-let svg, g, zoomBehavior;
-
-function drawTree() {
-  // Очищаем контейнер
-  treeContainer.innerHTML = '';
-
-  const rootData = buildHierarchy();
-  if (!rootData) {
-    treeContainer.innerHTML = '<p style="text-align:center;padding:40px;">Нет данных для отображения</p>';
-    return;
-  }
-
-  // Размеры
-  const container = treeContainer;
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-
-  // Создаем SVG
-  svg = d3.select('#tree-container')
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height);
-
-  // Группа для трансформаций
-  g = svg.append('g');
-
-  // Зум
-  zoomBehavior = d3.zoom()
-    .scaleExtent([0.2, 3])
-    .on('zoom', (event) => {
-      g.attr('transform', event.transform);
-    });
-
-  svg.call(zoomBehavior);
-  // Начальное смещение, чтобы дерево было видно по центру
-  svg.call(zoomBehavior.transform, d3.zoomIdentity.translate(50, 100).scale(0.8));
-
-  // Создаем иерархию D3
-  const root = d3.hierarchy(rootData);
-
-  // Определяем макет дерева (слева направо)
-  const treeLayout = d3.tree()
-    .size([height - 200, width - 200])
-    .separation((a, b) => (a.parent === b.parent ? 1.2 : 1.5));
-
-  treeLayout(root);
-
-  // Рисуем связи
-  g.selectAll('.link')
-    .data(root.links())
-    .enter()
-    .append('path')
-    .attr('class', 'link')
-    .attr('fill', 'none')
-    .attr('stroke', '#baa68b')
-    .attr('stroke-width', 2)
-    .attr('d', d3.linkHorizontal()
-      .x(d => d.y)
-      .y(d => d.x)
-    );
+  treeContainer.appendChild(svg);
 
   // Рисуем узлы
-  const node = g.selectAll('.node')
-    .data(root.descendants())
-    .enter()
-    .append('g')
-    .attr('class', 'node')
-    .attr('transform', d => `translate(${d.y},${d.x})`)
-    .on('click', (event, d) => {
-      event.stopPropagation();
-      if (d.data.id !== 'root') showPerson(d.data.id);
+  Object.entries(nodeCoords).forEach(([id, [x, y]]) => {
+    const person = people.find(p => p.id === id);
+    if (!person) return;
+
+    const nodeGroup = document.createElement('div');
+    nodeGroup.className = 'tree-node';
+    nodeGroup.style.left = (x - 35) + 'px';
+    nodeGroup.style.top = (y - 35) + 'px';
+    nodeGroup.style.width = '70px';
+    nodeGroup.style.height = '70px';
+    nodeGroup.style.position = 'absolute';
+    nodeGroup.style.cursor = 'pointer';
+    nodeGroup.style.zIndex = '2';
+    nodeGroup.setAttribute('data-id', id);
+
+    const circle = document.createElement('div');
+    circle.className = 'tree-circle';
+    circle.style.width = '70px';
+    circle.style.height = '70px';
+    circle.style.borderRadius = '50%';
+    circle.style.overflow = 'hidden';
+    circle.style.border = '2px solid #5a4a3a';
+    circle.style.backgroundColor = categoryColors[person.category] || '#ccc';
+    circle.style.backgroundSize = 'cover';
+    circle.style.backgroundPosition = 'center';
+    circle.style.display = 'flex';
+    circle.style.alignItems = 'center';
+    circle.style.justifyContent = 'center';
+
+    if (person.photo && person.photo !== 'images/placeholder.jpg') {
+      circle.style.backgroundImage = `url("${person.photo}")`;
+      circle.style.color = 'transparent';
+    } else {
+      const initials = person.name.split(' ').map(w => w[0]).join('').substring(0, 2);
+      circle.innerHTML = `<span style="color:#3b2e1e;font-weight:bold;font-size:20px;">${initials}</span>`;
+    }
+
+    const label = document.createElement('div');
+    label.className = 'tree-label';
+    label.style.position = 'absolute';
+    label.style.top = '75px';
+    label.style.left = '50%';
+    label.style.transform = 'translateX(-50%)';
+    label.style.textAlign = 'center';
+    label.style.fontSize = '12px';
+    label.style.color = '#3b2e1e';
+    label.style.whiteSpace = 'nowrap';
+    const shortName = person.name.split(' ').slice(0, 2).join(' ');
+    label.textContent = shortName;
+    if (person.birth) {
+      label.innerHTML += `<br><span style="font-size:10px;color:#7a6855;">${person.birth}${person.death ? '–' + person.death : ''}</span>`;
+    }
+
+    nodeGroup.appendChild(circle);
+    nodeGroup.appendChild(label);
+    nodeGroup.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showPerson(id);
     });
 
-  // Окружности с фото или инициалами
-  node.each(function(d) {
-    const el = d3.select(this);
-    const person = d.data;
-    const radius = 30;
-
-    // Если есть фото, используем pattern
-    if (person.photo && person.photo !== 'images/placeholder.jpg') {
-      // Создаем уникальный ID для pattern
-      const patternId = `img-${person.id}`;
-      // Определяем pattern
-      svg.append('defs')
-        .append('pattern')
-        .attr('id', patternId)
-        .attr('width', 1)
-        .attr('height', 1)
-        .append('image')
-        .attr('xlink:href', person.photo)
-        .attr('width', radius * 2)
-        .attr('height', radius * 2)
-        .attr('preserveAspectRatio', 'xMidYMid slice');
-
-      el.append('circle')
-        .attr('r', radius)
-        .attr('fill', `url(#${patternId})`)
-        .attr('stroke', '#5a4a3a')
-        .attr('stroke-width', 2);
-    } else {
-      // Без фото: цветной круг с инициалами
-      const color = categoryColors[person.category] || '#ccc';
-      el.append('circle')
-        .attr('r', radius)
-        .attr('fill', color)
-        .attr('stroke', '#5a4a3a')
-        .attr('stroke-width', 2);
-
-      const initials = person.name
-        .split(' ')
-        .map(w => w[0])
-        .join('')
-        .substring(0, 2);
-      el.append('text')
-        .attr('dy', 5)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', radius * 0.8)
-        .attr('fill', '#3b2e1e')
-        .text(initials);
-    }
+    treeContainer.appendChild(nodeGroup);
   });
 
-  // Подписи под узлами
-  node.append('text')
-    .attr('dy', 45)
-    .attr('text-anchor', 'middle')
-    .attr('font-size', '11px')
-    .attr('fill', '#3b2e1e')
-    .text(d => {
-      const p = d.data;
-      const years = p.birth ? `${p.birth}–${p.death || ''}` : '';
-      // Показываем только фамилию или короткое имя
-      const shortName = p.name.split(' ').slice(0, 2).join(' ');
-      return shortName.length > 18 ? shortName.substring(0, 16) + '...' : shortName;
-    });
+  applyTransform();
 }
+
+// ===================== ТРАНСФОРМАЦИЯ =====================
+function applyTransform() {
+  treeContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  document.getElementById('zoom-level').textContent = Math.round(scale * 100) + '%';
+}
+
+// ===================== ЗУМ И ПЕРЕТАСКИВАНИЕ =====================
+let isDragging = false, startX, startY, startTX, startTY;
+
+treeContainer.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.tree-node')) return;
+  isDragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
+  startTX = translateX;
+  startTY = translateY;
+  treeContainer.style.cursor = 'grabbing';
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  translateX = startTX + (e.clientX - startX);
+  translateY = startTY + (e.clientY - startY);
+  applyTransform();
+});
+
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  treeContainer.style.cursor = 'grab';
+});
+
+// Кнопки зума
+document.getElementById('zoom-in')?.addEventListener('click', () => {
+  scale = Math.min(3, scale * 1.2);
+  applyTransform();
+});
+document.getElementById('zoom-out')?.addEventListener('click', () => {
+  scale = Math.max(0.3, scale / 1.2);
+  applyTransform();
+});
+document.getElementById('zoom-reset')?.addEventListener('click', () => {
+  scale = 1;
+  translateX = 50;
+  translateY = 50;
+  applyTransform();
+});
 
 // ===================== КАРТОЧКА ЧЕЛОВЕКА =====================
 function showPerson(id) {
@@ -221,17 +233,15 @@ function showPerson(id) {
 
   const children = links.filter(l => l.from === id).map(l => people.find(p => p.id === l.to)).filter(Boolean);
   const parents = links.filter(l => l.to === id).map(l => people.find(p => p.id === l.from)).filter(Boolean);
-
   let spouse = null;
-  // Ищем супруга: общие дети
   if (children.length > 0) {
-    const spouseCandidates = links.filter(l => children.some(c => c.id === l.to) && l.from !== id).map(l => people.find(p => p.id === l.from));
-    spouse = spouseCandidates[0] || null;
+    const spouseCandidate = links.filter(l => children.some(c => c.id === l.to) && l.from !== id).map(l => people.find(p => p.id === l.from))[0];
+    spouse = spouseCandidate || null;
   }
 
   const galleryPhotos = [];
   if (person.photo && person.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: person.photo, caption: person.name });
-  if (spouse && spouse.photo && spouse.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: spouse.photo, caption: spouse.name });
+  if (spouse?.photo && spouse.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: spouse.photo, caption: spouse.name });
   parents.forEach(p => { if (p.photo && p.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: p.photo, caption: p.name }); });
   children.forEach(c => { if (c.photo && c.photo !== 'images/placeholder.jpg') galleryPhotos.push({ src: c.photo, caption: c.name }); });
 
@@ -256,15 +266,12 @@ function showPerson(id) {
       ` : ''}
     </div>
   `;
-
-  // Кликабельные ссылки на других людей
   modalBody.querySelectorAll('.person-link').forEach(link => {
     link.addEventListener('click', (e) => {
       e.stopPropagation();
       showPerson(link.dataset.id);
     });
   });
-
   personModal.style.display = 'block';
 }
 
@@ -302,12 +309,10 @@ document.querySelectorAll('.filter').forEach(btn => {
 });
 
 function applyFilter(filterVal) {
-  if (!svg) return;
-  svg.selectAll('.node').each(function(d) {
-    const person = d.data;
-    const show = filterVal === 'all' || person.category === filterVal;
-    d3.select(this).style('opacity', show ? 1 : 0.2);
-    // Также можно скрыть связи, но это сложнее, оставим так
+  document.querySelectorAll('.tree-node').forEach(node => {
+    const id = node.getAttribute('data-id');
+    const person = people.find(p => p.id === id);
+    node.style.opacity = (!person || filterVal === 'all' || person.category === filterVal) ? '1' : '0.2';
   });
 }
 
