@@ -14,8 +14,8 @@ header h1 { font-size: 2.8rem; font-weight: normal; letter-spacing: 2px; color: 
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 20px;
   flex-wrap: wrap;
-  gap: 8px;
   margin-bottom: 20px;
 }
 .filters { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -30,6 +30,23 @@ header h1 { font-size: 2.8rem; font-weight: normal; letter-spacing: 2px; color: 
   transition: 0.3s;
 }
 .filter.active, .filter:hover { background: #5a3e2b; color: #faf7f2; }
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.zoom-controls button {
+  background: #e7d7c8;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.zoom-controls button:hover { background: #5a3e2b; color: #faf7f2; }
+#zoom-level { font-size: 0.9rem; color: #7a6855; min-width: 50px; text-align: center; }
 
 /* Контейнер дерева */
 #tree-section { margin-bottom: 50px; }
@@ -81,6 +98,12 @@ footer { text-align: center; margin-top: 40px; font-style: italic; color: #7a685
 .gal-caption { font-size: 0.7rem; color: #7a6855; margin-top: 3px; }
 #chapter-body h3 { font-size: 1.6rem; color: #5a3e2b; margin-bottom: 15px; }
 #chapter-body p { line-height: 1.8; margin-bottom: 15px; text-align: justify; }
+
+/* Новые стили для узлов дерева */
+.tree-node { transition: transform 0.2s; }
+.tree-node:hover { transform: scale(1.1); z-index: 10; }
+.tree-circle { transition: box-shadow 0.2s; }
+.tree-node:hover .tree-circle { box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
 
 /* Адаптив */
 @media (max-width: 700px) {
