@@ -1,61 +1,567 @@
 // ===================== ЛЮДИ =====================
 const people = [
   // Язевы
-  { id: "firs", name: "Фирс", birth: "ок. 1760-е", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Крепостной крестьянин, дворовый человека барина. Самое дальнее известное имя рода. Жил в с. Новоселки Московской губернии.", spouse: "" },
-  { id: "afanasiy", name: "Афанасий Фирсович", birth: "ок. 1790-е", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Сын Фирса. Крепостной. Сторож в барском поместье. В 1812 году во время нашествия французов оставался один стеречь барское добро.", spouse: "" },
-  { id: "ivan_af", name: "Иван Афанасьевич Язев", birth: "1814", death: "1897", category: "yazev", photo: "images/placeholder.jpg", desc: "Словальщик и мотальщик шёлка. Грамотный, набожный, пел в хоре. Никогда не ругался. В получку покупал внукам баранки.", spouse: "Мария Галанина" },
-  { id: "marina", name: "Марина Афанасьевна Лифанцева", birth: "?", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Дочь Афанасия. Выдана замуж за Кирилу Лифанцева. Сын Пётр.", spouse: "" },
-  { id: "andrey", name: "Андрей Иванович Язев", birth: "1854", death: "1923", category: "yazev", photo: "images/placeholder.jpg", desc: "Слесарь на фабриках Лыжина и Синицына. Пил запоями, разбрасывал деньги. Разбойник Козёл провожал его домой. Бросил пить около 1910 г.", spouse: "Екатерина Платоновна Базаева" },
-  { id: "ekaterina", name: "Екатерина Платоновна Базаева", birth: "1852", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Рано осиротела. Работала по найму. Характер горячий, но отзывчивая.", spouse: "" },
-  { id: "anna_m", name: "Анна Андреевна Митрофанова", birth: "1877", death: "1920", category: "yazev", photo: "images/placeholder.jpg", desc: "Дочь Андрея. Вышла замуж за Якова Митрофанова. Умерла от тифа. Сын Михаил пропал.", spouse: "Яков Прокофьевич Митрофанов" },
-  { id: "ivan_andr", name: "Иван Андреевич Язев", birth: "1879", death: "1951", category: "yazev", photo: "images/placeholder.jpg", desc: "Слесарь фабрики Лыжина. Стаж 54 года. Награждён знаком Отличник соцсоревнования.", spouse: "Клавдия Егоровна Полетаева" },
-  { id: "klavdiya", name: "Клавдия Егоровна Полетаева", birth: "1883", death: "1960", category: "yazev", photo: "images/placeholder.jpg", desc: "Ткачиха на Лыжинской фабрике.", spouse: "" },
-  { id: "nikolay_yazev", name: "Николай Иванович Язев", birth: "1903", death: "после 1946", category: "yazev", photo: "images/placeholder.jpg", desc: "Автор рукописи. Инженер-капитан в ВОВ. Служил на складе №906 в Калуге.", spouse: "" },
-  { id: "yuriy_nik", name: "Юрий Николаевич Язев", birth: "1933", death: "1995", category: "yazev", photo: "images/placeholder.jpg", desc: "Электрик, фотограф-любитель. 4 раза сидел в тюрьме. После четвёртой ходки бросил пить и курить.", spouse: "Мария Сергеевна Ковешникова (разв.)" },
-  { id: "mariya", name: "Мария Сергеевна Язева (Ковешникова)", birth: "1933", death: "2021", category: "yazev", photo: "images/placeholder.jpg", desc: "Инженер-конструктор на ф-ке Лыжина. В детстве потеряла мать, работала у Кира Булычёва.", spouse: "Юрий Николаевич Язев (разв.)" },
-  { id: "leonid", name: "Леонид Николаевич Язев", birth: "?", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Сын Николая Ивановича. Дочери Анна и Наталья.", spouse: "" },
-  { id: "lyudmila", name: "Людмила Николаевна Язева", birth: "?", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Дочь Николая Ивановича. Дочери Мария и Юлия.", spouse: "" },
-  { id: "tatyana_n", name: "Татьяна Николаевна Язева", birth: "?", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Дочь Николая Ивановича. Сын Глеб.", spouse: "" },
-  { id: "andrey_nik", name: "Андрей Николаевич Язев", birth: "?", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Сын Николая Ивановича. Дети: Иван, Татьяна, Александр.", spouse: "" },
-  { id: "anatoliy_nik", name: "Анатолий Николаевич Язев", birth: "?", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Младший сын, жил с отцом.", spouse: "" },
-  { id: "sergey_yazev", name: "Сергей Анатольевич Язев", birth: "?", death: "?", category: "yazev", photo: "images/placeholder.jpg", desc: "Перепечатал рукопись 23.05.2008.", spouse: "" },
-  { id: "vera", name: "Вера Юрьевна Язева", birth: "1962", death: "", category: "yazev", photo: "images/placeholder.jpg", desc: "Дочь Юрия и Марии. Хранительница фотостудии.", spouse: "Александр Николаевич Чевордаев" },
-  { id: "lyubov", name: "Любовь Юрьевна Язева", birth: "1964", death: "", category: "yazev", photo: "images/placeholder.jpg", desc: "Дочь Юрия и Марии.", spouse: "Владимир Васильевич Самсонов" },
+  {
+    id: "firs",
+    name: "Фирс",
+    birth: "ок. 1760-е",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Крепостной крестьянин, дворовый человека барина. Самое дальнее известное имя рода. Жил в с. Новоселки Московской губернии.",
+    spouse: ""
+  },
+  {
+    id: "afanasiy",
+    name: "Афанасий Фирсович",
+    birth: "ок. 1790-е",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Фирса. Крепостной. Сторож в барском поместье. В 1812 году во время нашествия французов оставался один стеречь барское добро.",
+    spouse: ""
+  },
+  {
+    id: "ivan_af",
+    name: "Иван Афанасьевич Язев",
+    birth: "1814",
+    death: "1897",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Словальщик и мотальщик шёлка. Грамотный, набожный, пел в хоре. Никогда не ругался. В получку покупал внукам баранки.",
+    spouse: "Мария Галанина"
+  },
+  {
+    id: "marina",
+    name: "Марина Афанасьевна Лифанцева",
+    birth: "?",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Афанасия. Выдана замуж за Кирилу Лифанцева. Сын Пётр.",
+    spouse: ""
+  },
+  {
+    id: "andrey",
+    name: "Андрей Иванович Язев",
+    birth: "1854",
+    death: "1923",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Слесарь на фабриках Лыжина и Синицына. Пил запоями, разбрасывал деньги. Разбойник Козёл провожал его домой. Бросил пить около 1910 г.",
+    spouse: "Екатерина Платоновна Базаева"
+  },
+  {
+    id: "ekaterina",
+    name: "Екатерина Платоновна Базаева",
+    birth: "1852",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Рано осиротела. Работала по найму. Характер горячий, но отзывчивая.",
+    spouse: ""
+  },
+  {
+    id: "anna_m",
+    name: "Анна Андреевна Митрофанова",
+    birth: "1877",
+    death: "1920",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Андрея. Вышла замуж за Якова Митрофанова. Умерла от тифа. Сын Михаил пропал.",
+    spouse: "Яков Прокофьевич Митрофанов"
+  },
+  {
+    id: "ivan_andr",
+    name: "Иван Андреевич Язев",
+    birth: "1879",
+    death: "1951",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Слесарь фабрики Лыжина. Стаж 54 года. Награждён знаком Отличник соцсоревнования.",
+    spouse: "Клавдия Егоровна Полетаева"
+  },
+  {
+    id: "klavdiya",
+    name: "Клавдия Егоровна Полетаева",
+    birth: "1883",
+    death: "1960",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Ткачиха на Лыжинской фабрике.",
+    spouse: ""
+  },
+  {
+    id: "nikolay_yazev",
+    name: "Николай Иванович Язев",
+    birth: "1903",
+    death: "после 1946",
+    category: "yazev",
+    photo: "images/YazevNikIvanovichDetiVnukiJena.jpg",
+    photos: [
+      "images/YazeviNikIvanDetiJena.jpg"
+    ],
+    desc: "Автор рукописи. Инженер-капитан в ВОВ. Служил на складе №906 в Калуге.",
+    spouse: ""
+  },
+  {
+    id: "yuriy_nik",
+    name: "Юрий Николаевич Язев",
+    birth: "1933",
+    death: "1995",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Электрик, фотограф-любитель. 4 раза сидел в тюрьме. После четвёртой ходки бросил пить и курить.",
+    spouse: "Мария Сергеевна Ковешникова (разв.)"
+  },
+  {
+    id: "mariya",
+    name: "Мария Сергеевна Язева (Ковешникова)",
+    birth: "1933",
+    death: "2021",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Инженер-конструктор на ф-ке Лыжина. В детстве потеряла мать, работала у Кира Булычёва.",
+    spouse: "Юрий Николаевич Язев (разв.)"
+  },
+  {
+    id: "leonid",
+    name: "Леонид Николаевич Язев",
+    birth: "?",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Николая Ивановича. Дочери Анна и Наталья.",
+    spouse: ""
+  },
+  {
+    id: "lyudmila",
+    name: "Людмила Николаевна Язева",
+    birth: "?",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Николая Ивановича. Дочери Мария и Юлия.",
+    spouse: ""
+  },
+  {
+    id: "tatyana_n",
+    name: "Татьяна Николаевна Язева",
+    birth: "?",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Николая Ивановича. Сын Глеб.",
+    spouse: ""
+  },
+  {
+    id: "andrey_nik",
+    name: "Андрей Николаевич Язев",
+    birth: "?",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Николая Ивановича. Дети: Иван, Татьяна, Александр.",
+    spouse: ""
+  },
+  {
+    id: "anatoliy_nik",
+    name: "Анатолий Николаевич Язев",
+    birth: "?",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Младший сын, жил с отцом.",
+    spouse: ""
+  },
+  {
+    id: "sergey_yazev",
+    name: "Сергей Анатольевич Язев",
+    birth: "?",
+    death: "?",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Перепечатал рукопись 23.05.2008.",
+    spouse: ""
+  },
+  {
+    id: "vera",
+    name: "Вера Юрьевна Язева",
+    birth: "1962",
+    death: "",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [
+      "images/ChevorVeraDariaEvgenyDimaSasha2023.jpg"
+    ],
+    desc: "Дочь Юрия и Марии. Хранительница фотостудии.",
+    spouse: "Александр Николаевич Чевордаев"
+  },
+  {
+    id: "lyubov",
+    name: "Любовь Юрьевна Язева",
+    birth: "1964",
+    death: "",
+    category: "yazev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Юрия и Марии.",
+    spouse: "Владимир Васильевич Самсонов"
+  },
 
   // Ковешниковы
-  { id: "sergey_kov", name: "Сергей Васильевич Ковешников", birth: "?", death: "?", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Отец Марии. Ушёл на фронт.", spouse: "Ксения" },
-  { id: "kseniya", name: "Ксения Ковешникова", birth: "?", death: "ок. 1941", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Умерла от туберкулёза.", spouse: "" },
-  { id: "anatoliy_kov", name: "Анатолий Сергеевич Ковешников", birth: "?", death: "?", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Старший брат Марии. Жена Анастасия. Дочери Нина и Надежда.", spouse: "Анастасия" },
-  { id: "aleksandr_kov", name: "Александр Сергеевич Ковешников", birth: "?", death: "?", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Брат Марии. Дети Любовь, Михаил.", spouse: "" },
-  { id: "nina_kov", name: "Нина Анатольевна Ковешникова", birth: "?", death: "", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Дочь Анатолия. Муж погиб от взрыва бензобака. Дочь Надя.", spouse: "муж (погиб)" },
-  { id: "nadezhda_kov", name: "Надежда Анатольевна Ковешникова", birth: "?", death: "", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Дочь Анатолия. Сын Дмитрий (умер в 2020).", spouse: "" },
-  { id: "nadya_kov", name: "Надя (дочь Нины)", birth: "?", death: "", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Дочь Нины. Трое детей.", spouse: "" },
-  { id: "dmitriy_nad", name: "Дмитрий (сын Надежды)", birth: "?", death: "2020", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Сын Надежды Анатольевны. Умер в 2020.", spouse: "" },
-  { id: "lyubov_kov", name: "Любовь Александровна Ковешникова", birth: "?", death: "", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Дочь Александра Сергеевича.", spouse: "" },
-  { id: "mikhail_kov", name: "Михаил Александрович Ковешников", birth: "?", death: "", category: "koveshnikov", photo: "images/placeholder.jpg", desc: "Сын Александра Сергеевича.", spouse: "" },
+  {
+    id: "sergey_kov",
+    name: "Сергей Васильевич Ковешников",
+    birth: "?",
+    death: "?",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Отец Марии. Ушёл на фронт.",
+    spouse: "Ксения"
+  },
+  {
+    id: "kseniya",
+    name: "Ксения Ковешникова",
+    birth: "?",
+    death: "ок. 1941",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Умерла от туберкулёза.",
+    spouse: ""
+  },
+  {
+    id: "anatoliy_kov",
+    name: "Анатолий Сергеевич Ковешников",
+    birth: "?",
+    death: "?",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Старший брат Марии. Жена Анастасия. Дочери Нина и Надежда.",
+    spouse: "Анастасия"
+  },
+  {
+    id: "aleksandr_kov",
+    name: "Александр Сергеевич Ковешников",
+    birth: "?",
+    death: "?",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Брат Марии. Дети Любовь, Михаил.",
+    spouse: ""
+  },
+  {
+    id: "nina_kov",
+    name: "Нина Анатольевна Ковешникова",
+    birth: "?",
+    death: "",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Анатолия. Муж погиб от взрыва бензобака. Дочь Надя.",
+    spouse: "муж (погиб)"
+  },
+  {
+    id: "nadezhda_kov",
+    name: "Надежда Анатольевна Ковешникова",
+    birth: "?",
+    death: "",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Анатолия. Сын Дмитрий (умер в 2020).",
+    spouse: ""
+  },
+  {
+    id: "nadya_kov",
+    name: "Надя (дочь Нины)",
+    birth: "?",
+    death: "",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Нины. Трое детей.",
+    spouse: ""
+  },
+  {
+    id: "dmitriy_nad",
+    name: "Дмитрий (сын Надежды)",
+    birth: "?",
+    death: "2020",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Надежды Анатольевны. Умер в 2020.",
+    spouse: ""
+  },
+  {
+    id: "lyubov_kov",
+    name: "Любовь Александровна Ковешникова",
+    birth: "?",
+    death: "",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Александра Сергеевича.",
+    spouse: ""
+  },
+  {
+    id: "mikhail_kov",
+    name: "Михаил Александрович Ковешников",
+    birth: "?",
+    death: "",
+    category: "koveshnikov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Александра Сергеевича.",
+    spouse: ""
+  },
 
   // Чевордаевы
-  { id: "ivan_che", name: "Иван Прокофьевич Чевордаев", birth: "ок. 1883", death: "1950", category: "chevardaev", photo: "images/ChevorlvanProkof1915.jpg", desc: "Столяр из Казани. Умер в Ивантеевке.", spouse: "Прасковья Петровна" },
-  { id: "praskovya", name: "Прасковья Петровна Чевордаева", birth: "ок. 1884", death: "1968", category: "chevardaev", photo: "images/ChevorProskoviaPetr1915.jpg", desc: "Служащая. 8 детей, 4 живы.", spouse: "" },
-  { id: "nikolay_che", name: "Николай Иванович Чевордаев", birth: "1921", death: "2002", category: "chevardaev", photo: "images/ChevorNiklvanovich1956.jpg", desc: "Артиллерист на танке, ранен. Орден Отечественной войны II ст.", spouse: "Раиса Егоровна" },
-  { id: "raisa", name: "Раиса Егоровна Чевордаева", birth: "?", death: "?", category: "chevardaev", photo: "images/ChevordaevaRaisaEgorovna2010.jpg", desc: "Жена Николая Ивановича.", spouse: "" },
-  { id: "yuriy_che", name: "Юрий Николаевич Чевордаев", birth: "ок. 1951", death: "?", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Сын Николая Ивановича. Жена Татьяна. Сыновья Алексей и Вячеслав.", spouse: "Татьяна" },
-  { id: "aleksandr_che", name: "Александр Николаевич Чевордаев", birth: "1961", death: "2010", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Муж Веры Юрьевны. Сыновья Евгений и Игорь.", spouse: "Вера Юрьевна Язева" },
-  { id: "evgeniy", name: "Евгений Александрович Чевордаев", birth: "1985", death: "", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Составитель этого сайта. Сыновья Александр и Дмитрий.", spouse: "" },
-  { id: "igor_che", name: "Игорь Александрович Чевордаев", birth: "1995", death: "", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Брат Евгения.", spouse: "" },
-  { id: "alexey_che", name: "Алексей Юрьевич Чевордаев", birth: "1979", death: "ум. (38 лет)", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Сын Юрия Николаевича. Жена Татьяна. Сын Артём. Погиб.", spouse: "Татьяна" },
-  { id: "vyacheslav_che", name: "Вячеслав Юрьевич Чевордаев", birth: "1977", death: "ум. (46 лет)", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Сын Юрия Николаевича. Жена Татьяна. Дочь Лера. Погиб.", spouse: "Татьяна" },
-  { id: "tatyana_alexey", name: "Татьяна (жена Алексея)", birth: "?", death: "ум.", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Жена Алексея. Погибла.", spouse: "Алексей" },
-  { id: "tatyana_vyach", name: "Татьяна (жена Вячеслава)", birth: "?", death: "ум.", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Жена Вячеслава. Погибла.", spouse: "Вячеслав" },
-  { id: "artem_che", name: "Артём Алексеевич Чевордаев", birth: "?", death: "", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Сын Алексея и Татьяны.", spouse: "" },
-  { id: "lera_che", name: "Валерия (Лера) Вячеславовна Чевордаева", birth: "?", death: "", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Дочь Вячеслава и Татьяны.", spouse: "" },
+  {
+    id: "ivan_che",
+    name: "Иван Прокофьевич Чевордаев",
+    birth: "ок. 1883",
+    death: "1950",
+    category: "chevardaev",
+    photo: "images/ChevorIvanProkof1915.jpg",
+    photos: [
+      "images/ChevorIvanProkofSvidOsmerti1950.jpg"
+    ],
+    desc: "Столяр из Казани. Умер в Ивантеевке.",
+    spouse: "Прасковья Петровна"
+  },
+  {
+    id: "praskovya",
+    name: "Прасковья Петровна Чевордаева",
+    birth: "ок. 1884",
+    death: "1968",
+    category: "chevardaev",
+    photo: "images/ChevorProskoviaPetr1915.jpg",
+    photos: [
+      "images/ChevorProskoviaPetrSvidOsmerti1968.jpg"
+    ],
+    desc: "Служащая. 8 детей, 4 живы.",
+    spouse: ""
+  },
+  {
+    id: "nikolay_che",
+    name: "Николай Иванович Чевордаев",
+    birth: "1921",
+    death: "2002",
+    category: "chevardaev",
+    photo: "images/ChevorNikIvanovich1956.jpg",
+    photos: [
+      "images/ChevorNikIvanovich1955.jpg",
+      "images/ChevorNikolayIvanovich1980.jpg",
+      "images/ChevorNikolayIvanovich1995.jpg",
+      "images/ChevorNikIvanovichRaisaEgorovna.jpg"
+    ],
+    desc: "Артиллерист на танке, ранен. Орден Отечественной войны II ст.",
+    spouse: "Раиса Егоровна"
+  },
+  {
+    id: "raisa",
+    name: "Раиса Егоровна Чевордаева",
+    birth: "?",
+    death: "?",
+    category: "chevardaev",
+    photo: "images/ChevordaevaRaisaEgorovna2010.jpg",
+    photos: [
+      "images/ChevorRaisaEgorovnaSsesrami1980.jpg",
+      "images/ChevorNikIvanovichRaisaEgorovna.jpg"
+    ],
+    desc: "Жена Николая Ивановича.",
+    spouse: ""
+  },
+  {
+    id: "yuriy_che",
+    name: "Юрий Николаевич Чевордаев",
+    birth: "ок. 1951",
+    death: "?",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Николая Ивановича. Жена Татьяна. Сыновья Алексей и Вячеслав.",
+    spouse: "Татьяна"
+  },
+  {
+    id: "aleksandr_che",
+    name: "Александр Николаевич Чевордаев",
+    birth: "1961",
+    death: "2010",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Муж Веры Юрьевны. Сыновья Евгений и Игорь.",
+    spouse: "Вера Юрьевна Язева"
+  },
+  {
+    id: "evgeniy",
+    name: "Евгений Александрович Чевордаев",
+    birth: "1985",
+    death: "",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Составитель этого сайта. Сыновья Александр и Дмитрий.",
+    spouse: ""
+  },
+  {
+    id: "igor_che",
+    name: "Игорь Александрович Чевордаев",
+    birth: "1995",
+    death: "",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Брат Евгения.",
+    spouse: ""
+  },
+  {
+    id: "alexey_che",
+    name: "Алексей Юрьевич Чевордаев",
+    birth: "1979",
+    death: "ум. (38 лет)",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Юрия Николаевича. Жена Татьяна. Сын Артём. Погиб.",
+    spouse: "Татьяна"
+  },
+  {
+    id: "vyacheslav_che",
+    name: "Вячеслав Юрьевич Чевордаев",
+    birth: "1977",
+    death: "ум. (46 лет)",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Юрия Николаевича. Жена Татьяна. Дочь Лера. Погиб.",
+    spouse: "Татьяна"
+  },
+  {
+    id: "tatyana_alexey",
+    name: "Татьяна (жена Алексея)",
+    birth: "?",
+    death: "ум.",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Жена Алексея. Погибла.",
+    spouse: "Алексей"
+  },
+  {
+    id: "tatyana_vyach",
+    name: "Татьяна (жена Вячеслава)",
+    birth: "?",
+    death: "ум.",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Жена Вячеслава. Погибла.",
+    spouse: "Вячеслав"
+  },
+  {
+    id: "artem_che",
+    name: "Артём Алексеевич Чевордаев",
+    birth: "?",
+    death: "",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Алексея и Татьяны.",
+    spouse: ""
+  },
+  {
+    id: "lera_che",
+    name: "Валерия (Лера) Вячеславовна Чевордаева",
+    birth: "?",
+    death: "",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Вячеслава и Татьяны.",
+    spouse: ""
+  },
 
   // Самсоновы
-  { id: "vladimir", name: "Владимир Васильевич Самсонов", birth: "1959", death: "", category: "samsnov", photo: "images/placeholder.jpg", desc: "Муж Любови Юрьевны.", spouse: "Любовь Юрьевна Язева" },
-  { id: "aleksandr_sam", name: "Александр Владимирович Самсонов", birth: "1984", death: "", category: "samsnov", photo: "images/placeholder.jpg", desc: "Сын Любови. Дочери Таисия и Алиса.", spouse: "" },
-  { id: "svetlana", name: "Светлана Владимировна Самсонова", birth: "1986", death: "", category: "samsnov", photo: "images/placeholder.jpg", desc: "Дочь Любови. Дочери Надежда и Екатерина.", spouse: "" },
-  { id: "alexandr_evg", name: "Александр Евгеньевич Чевордаев", birth: "2016", death: "", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Старший сын Евгения.", spouse: "" },
-  { id: "dmitriy", name: "Дмитрий Евгеньевич Чевордаев", birth: "2019", death: "", category: "chevardaev", photo: "images/placeholder.jpg", desc: "Младший сын Евгения.", spouse: "" }
+  {
+    id: "vladimir",
+    name: "Владимир Васильевич Самсонов",
+    birth: "1959",
+    death: "",
+    category: "samsnov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Муж Любови Юрьевны.",
+    spouse: "Любовь Юрьевна Язева"
+  },
+  {
+    id: "aleksandr_sam",
+    name: "Александр Владимирович Самсонов",
+    birth: "1984",
+    death: "",
+    category: "samsnov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Сын Любови. Дочери Таисия и Алиса.",
+    spouse: ""
+  },
+  {
+    id: "svetlana",
+    name: "Светлана Владимировна Самсонова",
+    birth: "1986",
+    death: "",
+    category: "samsnov",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Дочь Любови. Дочери Надежда и Екатерина.",
+    spouse: ""
+  },
+  {
+    id: "alexandr_evg",
+    name: "Александр Евгеньевич Чевордаев",
+    birth: "2016",
+    death: "",
+    category: "chevardaev",
+    photo: "images/ChevorAlexEvg1klass2023.jpg",
+    photos: [],
+    desc: "Старший сын Евгения.",
+    spouse: ""
+  },
+  {
+    id: "dmitriy",
+    name: "Дмитрий Евгеньевич Чевордаев",
+    birth: "2019",
+    death: "",
+    category: "chevardaev",
+    photo: "images/placeholder.jpg",
+    photos: [],
+    desc: "Младший сын Евгения.",
+    spouse: ""
+  }
 ];
 
 // ===================== СВЯЗИ =====================
